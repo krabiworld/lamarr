@@ -22,5 +22,11 @@ func Start() {
 		return nil
 	})
 
-	log.Fatal().Err(app.Listen(cfg.Get().ApiAddr)).Send()
+	go func() {
+		log.Fatal().Err(app.Listen(cfg.Get().ApiAddr)).Send()
+	}()
+
+	log.Info().Msg("API started")
+
+	select {}
 }

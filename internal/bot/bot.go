@@ -19,7 +19,7 @@ func Start() {
 		log.Fatal().Err(err).Send()
 	}
 
-	log.Info().Msg("Bot is now running")
+	log.Info().Msg("Bot started")
 
 	select {}
 }
