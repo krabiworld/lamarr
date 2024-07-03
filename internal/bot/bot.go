@@ -14,6 +14,7 @@ func Start() {
 		log.Fatal().Err(err).Send()
 	}
 
+	session.Identify.Intents = discordgo.IntentsAll
 	session.State.MaxMessageCount = 1000
 
 	commands := InitCommands()
@@ -37,21 +38,19 @@ func Start() {
 }
 
 func InitCommands() []*handler.Command {
-	commands := make([]*handler.Command, 1)
-
-	commands[0] = &handler.Command{
-		Command: &discordgo.ApplicationCommand{
-			Name:        "server",
-			Description: "Show information about current server.",
+	return []*handler.Command{
+		{
+			Command: &discordgo.ApplicationCommand{
+				Name:        "server",
+				Description: "Show information about current server.",
+			},
+			Category:          handler.INFORMATION,
+			OwnerCommand:      false,
+			ModerationCommand: false,
+			Hidden:            false,
+			Handler:           &information.ServerCommand{},
 		},
-		Category:          handler.INFORMATION,
-		OwnerCommand:      false,
-		ModerationCommand: false,
-		Hidden:            false,
-		Handler:           &information.ServerCommand{},
 	}
-
-	return commands
 }
 
 func RegisterCommands(session *discordgo.Session, handler *handler.CommandHandler) {
