@@ -18,12 +18,16 @@ func Start() {
 		JSONDecoder:  json.Unmarshal,
 	})
 
+	listenConfig := fiber.ListenConfig{
+		DisableStartupMessage: true,
+	}
+
 	app.Get("/commands", func(c fiber.Ctx) error {
 		return nil
 	})
 
 	go func() {
-		log.Fatal().Err(app.Listen(cfg.Get().ApiAddr)).Send()
+		log.Fatal().Err(app.Listen(cfg.Get().ApiAddr, listenConfig)).Send()
 	}()
 
 	log.Info().Msg("API started")

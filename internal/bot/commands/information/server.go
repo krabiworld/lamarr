@@ -3,26 +3,55 @@ package information
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/rs/zerolog/log"
+	"module-go/internal/bot/handler"
+	"module-go/internal/colors"
 )
 
-func Server(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	guild, err := s.Guild(i.GuildID)
+type ServerCommand struct{}
+
+func (cmd *ServerCommand) Handle(ctx *handler.CommandContext) error {
+	guild, err := ctx.Session.State.Guild(ctx.Event.GuildID)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to fetch guild")
-		return
+		guild, err = ctx.Session.Guild(ctx.Event.GuildID)
+		if err != nil {
+			return err
+		}
 	}
 
 	embed := &discordgo.MessageEmbed{
 		Title: fmt.Sprintf("Information about %s", guild.Name),
+		Color: colors.DEFAULT,
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: guild.IconURL("128"),
+		},
+		Image: &discordgo.MessageEmbedImage{
+			URL: guild.BannerURL("512"),
+		},
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: fmt.Sprintf("ID: %s", guild.ID),
+		},
+		Fields: []*discordgo.MessageEmbedField{
+			cmd.MembersField(guild),
+		},
 	}
 
-	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	})
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to interact with interaction")
+	return ctx.ReplyEmbed(embed)
+}
+
+func (cmd *ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+	botCount, memberCount := 0, 0
+
+	for _, member := range guild.Members {
+		if member.User.Bot {
+			botCount++
+		} else {
+			memberCount++
+		}
+	}
+
+	return &discordgo.MessageEmbedField{
+		Name:   fmt.Sprintf("Members (%d)", guild.MemberCount),
+		Value:  fmt.Sprintf("Members: **%d**\nBots: **%d**", memberCount, botCount),
+		Inline: true,
 	}
 }

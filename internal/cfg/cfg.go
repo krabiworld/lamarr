@@ -16,8 +16,9 @@ type Config struct {
 	ApiAddr string `env:"API_ADDR"`
 
 	// Discord
-	DiscordGuildID uint64 `env:"DISCORD_GUILD_ID"`
-	DiscordBotID   uint64 `env:"DISCORD_BOT_ID"`
+	DiscordOwnerID string `env:"DISCORD_OWNER_ID"`
+	DiscordGuildID string `env:"DISCORD_GUILD_ID"`
+	DiscordBotID   string `env:"DISCORD_BOT_ID"`
 	DiscordToken   string `env:"DISCORD_TOKEN"`
 
 	// Database
