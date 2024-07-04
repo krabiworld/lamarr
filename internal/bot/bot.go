@@ -15,7 +15,8 @@ func Start() {
 	}
 
 	session.Identify.Intents = discordgo.IntentsAll
-	session.State.MaxMessageCount = 1000
+	session.StateEnabled = true
+	session.State.MaxMessageCount = 100
 
 	commands := InitCommands()
 

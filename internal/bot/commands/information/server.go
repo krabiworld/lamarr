@@ -10,12 +10,9 @@ import (
 type ServerCommand struct{}
 
 func (cmd *ServerCommand) Handle(ctx *handler.CommandContext) error {
-	guild, err := ctx.Session.State.Guild(ctx.Event.GuildID)
+	guild, err := ctx.Guild()
 	if err != nil {
-		guild, err = ctx.Session.Guild(ctx.Event.GuildID)
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
 	embed := &discordgo.MessageEmbed{

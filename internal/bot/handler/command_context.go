@@ -24,3 +24,15 @@ func (ctx *CommandContext) ReplyEmbed(embed *discordgo.MessageEmbed) error {
 		},
 	})
 }
+
+func (ctx *CommandContext) Guild() (*discordgo.Guild, error) {
+	guild, err := ctx.Session.State.Guild(ctx.Event.GuildID)
+	if err != nil {
+		guild, err = ctx.Session.Guild(ctx.Event.GuildID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return guild, nil
+}
