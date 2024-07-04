@@ -36,3 +36,19 @@ func (ctx *CommandContext) Guild() (*discordgo.Guild, error) {
 
 	return guild, nil
 }
+
+func (ctx *CommandContext) MemberByID(id string) (*discordgo.Member, error) {
+	member, err := ctx.Session.State.Member(ctx.Event.GuildID, id)
+	if err != nil {
+		member, err = ctx.Session.GuildMember(ctx.Event.GuildID, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return member, nil
+}
+
+func (ctx *CommandContext) GuildOwner(ownerId string) (*discordgo.Member, error) {
+	return ctx.MemberByID(ownerId)
+}
