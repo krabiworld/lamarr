@@ -21,3 +21,11 @@ func (r *GuildRepositoryImpl) FindByID(id string) (*models.Guild, error) {
 
 	return guild, nil
 }
+
+func (r *GuildRepositoryImpl) Create(guild *models.Guild) error {
+	return r.db.Create(guild).Error
+}
+
+func (r *GuildRepositoryImpl) Update(guild *models.Guild) error {
+	return r.db.Save(guild).Error
+}
