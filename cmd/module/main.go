@@ -4,6 +4,7 @@ import (
 	"module-go/internal/api"
 	"module-go/internal/bot"
 	"module-go/internal/cfg"
+	"module-go/internal/db"
 	"module-go/internal/logger"
 	"os"
 	"os/signal"
@@ -13,6 +14,7 @@ import (
 func main() {
 	cfg.Init()
 	logger.Init()
+	db.Init()
 
 	go api.Start()
 	go bot.Start()
