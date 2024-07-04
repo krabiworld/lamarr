@@ -3,7 +3,7 @@ package information
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"module-go/internal/bot/handler"
+	"module-go/internal/bot/handlers/command"
 	"module-go/internal/colors"
 	"strings"
 	"time"
@@ -11,7 +11,7 @@ import (
 
 type ServerCommand struct{}
 
-func (cmd *ServerCommand) Handle(ctx *handler.CommandContext) error {
+func (cmd *ServerCommand) Handle(ctx *command.Context) error {
 	guild, err := ctx.Guild()
 	if err != nil {
 		return err

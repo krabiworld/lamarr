@@ -1,13 +1,14 @@
-package handler
+package command
 
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
+	"module-go/internal/bot/types"
 )
 
 type Command struct {
 	Command           *discordgo.ApplicationCommand
-	Category          Category
+	Category          types.Category
 	OwnerCommand      bool
 	ModerationCommand bool
 	Hidden            bool
@@ -15,7 +16,7 @@ type Command struct {
 }
 
 func (c *Command) Run(session *discordgo.Session, i *discordgo.InteractionCreate) {
-	ctx := &CommandContext{
+	ctx := &Context{
 		Session: session,
 		Event:   i,
 		command: c,

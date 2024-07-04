@@ -1,14 +1,14 @@
-package handler
+package command
 
 import "github.com/bwmarrin/discordgo"
 
-type CommandContext struct {
+type Context struct {
 	Session *discordgo.Session
 	Event   *discordgo.InteractionCreate
 	command *Command
 }
 
-func (ctx *CommandContext) Reply(message string) error {
+func (ctx *Context) Reply(message string) error {
 	return ctx.Session.InteractionRespond(ctx.Event.Interaction, &discordgo.InteractionResponse{
 		Data: &discordgo.InteractionResponseData{
 			Content: message,
@@ -16,7 +16,7 @@ func (ctx *CommandContext) Reply(message string) error {
 	})
 }
 
-func (ctx *CommandContext) ReplyEmbed(embed *discordgo.MessageEmbed) error {
+func (ctx *Context) ReplyEmbed(embed *discordgo.MessageEmbed) error {
 	return ctx.Session.InteractionRespond(ctx.Event.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -25,7 +25,7 @@ func (ctx *CommandContext) ReplyEmbed(embed *discordgo.MessageEmbed) error {
 	})
 }
 
-func (ctx *CommandContext) Guild() (*discordgo.Guild, error) {
+func (ctx *Context) Guild() (*discordgo.Guild, error) {
 	guild, err := ctx.Session.State.Guild(ctx.Event.GuildID)
 	if err != nil {
 		guild, err = ctx.Session.Guild(ctx.Event.GuildID)
@@ -37,7 +37,7 @@ func (ctx *CommandContext) Guild() (*discordgo.Guild, error) {
 	return guild, nil
 }
 
-func (ctx *CommandContext) MemberByID(id string) (*discordgo.Member, error) {
+func (ctx *Context) MemberByID(id string) (*discordgo.Member, error) {
 	member, err := ctx.Session.State.Member(ctx.Event.GuildID, id)
 	if err != nil {
 		member, err = ctx.Session.GuildMember(ctx.Event.GuildID, id)
@@ -49,6 +49,6 @@ func (ctx *CommandContext) MemberByID(id string) (*discordgo.Member, error) {
 	return member, nil
 }
 
-func (ctx *CommandContext) GuildOwner(ownerId string) (*discordgo.Member, error) {
+func (ctx *Context) GuildOwner(ownerId string) (*discordgo.Member, error) {
 	return ctx.MemberByID(ownerId)
 }
