@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"module-go/internal/bot/handlers/command"
-	"module-go/internal/colors"
+	"module-go/internal/types"
 	"strings"
 	"time"
 )
@@ -29,7 +29,7 @@ func (cmd *ServerCommand) Handle(ctx *command.Context) error {
 
 	embed := &discordgo.MessageEmbed{
 		Title: fmt.Sprintf("Information about %s", guild.Name),
-		Color: colors.DEFAULT,
+		Color: types.DEFAULT.Int(),
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: guild.IconURL("128"),
 		},

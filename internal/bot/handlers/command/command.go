@@ -3,7 +3,7 @@ package command
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
-	"module-go/internal/bot/types"
+	"module-go/internal/types"
 )
 
 type Command struct {

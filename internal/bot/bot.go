@@ -6,9 +6,9 @@ import (
 	"module-go/internal/bot/commands/information"
 	"module-go/internal/bot/handlers"
 	"module-go/internal/bot/handlers/command"
-	"module-go/internal/bot/types"
 	"module-go/internal/cfg"
 	"module-go/internal/services"
+	"module-go/internal/types"
 )
 
 func Start(guildService services.GuildService) {
