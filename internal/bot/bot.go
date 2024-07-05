@@ -24,9 +24,10 @@ func Start(guildService services.GuildService) {
 	guildEvents := handlers.NewGuildEvents(guildService)
 
 	commands := InitCommands()
-	commandHandler := command.NewCommandHandler(commands)
+	commandHandler := command.NewCommandHandler(commands, guildService)
 
 	session.AddHandler(guildEvents.OnGuildCreate)
+	session.AddHandler(commandHandler.OnMessage)
 	session.AddHandler(commandHandler.OnInteraction)
 
 	if err := session.Open(); err != nil {
@@ -43,10 +44,8 @@ func Start(guildService services.GuildService) {
 func InitCommands() []*command.Command {
 	return []*command.Command{
 		{
-			Command: &discordgo.ApplicationCommand{
-				Name:        "server",
-				Description: "Show information about current server.",
-			},
+			Name:              "server",
+			Description:       "Information about server",
 			Category:          types.INFORMATION,
 			OwnerCommand:      false,
 			ModerationCommand: false,
@@ -58,7 +57,11 @@ func InitCommands() []*command.Command {
 
 func RegisterCommands(session *discordgo.Session, commandHandler *command.Handler, guildId string) {
 	for _, cmd := range commandHandler.Commands {
-		_, err := session.ApplicationCommandCreate(session.State.User.ID, guildId, cmd.Command)
+		applicationCommand := &discordgo.ApplicationCommand{
+			Name:        cmd.Name,
+			Description: cmd.Description,
+		}
+		_, err := session.ApplicationCommandCreate(session.State.User.ID, guildId, applicationCommand)
 		if err != nil {
 			log.Error().Err(err).Send()
 		}

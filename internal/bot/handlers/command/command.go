@@ -7,7 +7,8 @@ import (
 )
 
 type Command struct {
-	Command           *discordgo.ApplicationCommand
+	Name              string
+	Description       string
 	Category          types.Category
 	OwnerCommand      bool
 	ModerationCommand bool
@@ -15,11 +16,20 @@ type Command struct {
 	Handler           ICommand
 }
 
-func (c *Command) Run(session *discordgo.Session, i *discordgo.InteractionCreate) {
+func (c *Command) Run(s *discordgo.Session, m *discordgo.MessageCreate, i *discordgo.InteractionCreate) {
+	var guildId string
+
+	if i == nil {
+		guildId = m.GuildID
+	} else {
+		guildId = i.GuildID
+	}
+
 	ctx := &Context{
-		Session: session,
+		Session: s,
+		Message: m,
 		Event:   i,
-		command: c,
+		GuildID: guildId,
 	}
 
 	if err := c.Handler.Handle(ctx); err != nil {

@@ -4,31 +4,33 @@ import "github.com/bwmarrin/discordgo"
 
 type Context struct {
 	Session *discordgo.Session
+	Message *discordgo.MessageCreate
 	Event   *discordgo.InteractionCreate
-	command *Command
+	GuildID string
 }
 
-func (ctx *Context) Reply(message string) error {
-	return ctx.Session.InteractionRespond(ctx.Event.Interaction, &discordgo.InteractionResponse{
-		Data: &discordgo.InteractionResponseData{
-			Content: message,
-		},
-	})
-}
-
-func (ctx *Context) ReplyEmbed(embed *discordgo.MessageEmbed) error {
-	return ctx.Session.InteractionRespond(ctx.Event.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
-	})
+func (ctx *Context) Reply(embed *discordgo.MessageEmbed) error {
+	if ctx.Event == nil {
+		_, err := ctx.Session.ChannelMessageSendEmbedReply(
+			ctx.Message.ChannelID,
+			embed,
+			ctx.Message.Reference(),
+		)
+		return err
+	} else {
+		return ctx.Session.InteractionRespond(ctx.Event.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Embeds: []*discordgo.MessageEmbed{embed},
+			},
+		})
+	}
 }
 
 func (ctx *Context) Guild() (*discordgo.Guild, error) {
-	guild, err := ctx.Session.State.Guild(ctx.Event.GuildID)
+	guild, err := ctx.Session.State.Guild(ctx.GuildID)
 	if err != nil {
-		guild, err = ctx.Session.Guild(ctx.Event.GuildID)
+		guild, err = ctx.Session.Guild(ctx.GuildID)
 		if err != nil {
 			return nil, err
 		}
@@ -38,9 +40,9 @@ func (ctx *Context) Guild() (*discordgo.Guild, error) {
 }
 
 func (ctx *Context) MemberByID(id string) (*discordgo.Member, error) {
-	member, err := ctx.Session.State.Member(ctx.Event.GuildID, id)
+	member, err := ctx.Session.State.Member(ctx.GuildID, id)
 	if err != nil {
-		member, err = ctx.Session.GuildMember(ctx.Event.GuildID, id)
+		member, err = ctx.Session.GuildMember(ctx.GuildID, id)
 		if err != nil {
 			return nil, err
 		}

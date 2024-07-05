@@ -49,7 +49,7 @@ func (cmd *ServerCommand) Handle(ctx *command.Context) error {
 		},
 	}
 
-	return ctx.ReplyEmbed(embed)
+	return ctx.Reply(embed)
 }
 
 func (cmd *ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
