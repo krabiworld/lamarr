@@ -6,10 +6,10 @@ import (
 )
 
 type GuildServiceImpl struct {
-	r *repositories.GuildRepository
+	r repositories.GuildRepository
 }
 
-func NewGuildServiceImpl(r *repositories.GuildRepository) *GuildServiceImpl {
+func NewGuildServiceImpl(r repositories.GuildRepository) *GuildServiceImpl {
 	return &GuildServiceImpl{r: r}
 }
 

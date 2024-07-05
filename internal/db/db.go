@@ -9,9 +9,7 @@ import (
 	"module-go/internal/db/models"
 )
 
-var db *gorm.DB
-
-func Init() {
+func InitAndGet() *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		cfg.Get().DBHostname,
@@ -21,12 +19,16 @@ func Init() {
 		cfg.Get().DBPort,
 	)
 
-	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	config := &gorm.Config{
+		Logger: Logger{},
+	}
+
+	db, err := gorm.Open(postgres.Open(dsn), config)
 	if err != nil {
 		log.Fatal().Err(err).Send()
 	}
 
-	err = conn.AutoMigrate(
+	err = db.AutoMigrate(
 		&models.Guild{},
 		&models.Warn{},
 		&models.Stats{},
@@ -35,9 +37,5 @@ func Init() {
 		log.Fatal().Err(err).Send()
 	}
 
-	db = conn
-}
-
-func Get() *gorm.DB {
 	return db
 }

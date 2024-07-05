@@ -4,12 +4,14 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/bot/commands/information"
+	"module-go/internal/bot/handlers"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/bot/types"
 	"module-go/internal/cfg"
+	"module-go/internal/services"
 )
 
-func Start() {
+func Start(guildService services.GuildService) {
 	session, err := discordgo.New("Bot " + cfg.Get().DiscordToken)
 	if err != nil {
 		log.Fatal().Err(err).Send()
@@ -19,8 +21,12 @@ func Start() {
 	session.StateEnabled = true
 	session.State.MaxMessageCount = 100
 
+	guildEvents := handlers.NewGuildEvents(guildService)
+
 	commands := InitCommands()
 	commandHandler := command.NewCommandHandler(commands)
+
+	session.AddHandler(guildEvents.OnGuildCreate)
 	session.AddHandler(commandHandler.OnInteraction)
 
 	if err := session.Open(); err != nil {
