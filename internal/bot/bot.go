@@ -23,47 +23,31 @@ func Start(guildService services.GuildService) {
 
 	guildEvents := handlers.NewGuildEvents(guildService)
 
-	commands := InitCommands()
-	commandHandler := command.NewCommandHandler(commands, guildService)
+	commandHandler := command.NewCommandHandler(InitCommands(), guildService)
 
 	session.AddHandler(guildEvents.OnGuildCreate)
 	session.AddHandler(commandHandler.OnMessage)
-	session.AddHandler(commandHandler.OnInteraction)
 
 	if err := session.Open(); err != nil {
 		log.Fatal().Err(err).Send()
 	}
-
-	RegisterCommands(session, commandHandler, cfg.Get().DiscordGuildID)
 
 	log.Info().Msg("Bot started")
 
 	select {}
 }
 
-func InitCommands() []*command.Command {
-	return []*command.Command{
-		{
+func InitCommands() map[string]*command.Command {
+	return map[string]*command.Command{
+		"server": {
 			Name:              "server",
 			Description:       "Information about server",
 			Category:          types.INFORMATION,
 			OwnerCommand:      false,
 			ModerationCommand: false,
 			Hidden:            false,
+			Arguments:         nil,
 			Handler:           &information.ServerCommand{},
 		},
-	}
-}
-
-func RegisterCommands(session *discordgo.Session, commandHandler *command.Handler, guildId string) {
-	for _, cmd := range commandHandler.Commands {
-		applicationCommand := &discordgo.ApplicationCommand{
-			Name:        cmd.Name,
-			Description: cmd.Description,
-		}
-		_, err := session.ApplicationCommandCreate(session.State.User.ID, guildId, applicationCommand)
-		if err != nil {
-			log.Error().Err(err).Send()
-		}
 	}
 }
