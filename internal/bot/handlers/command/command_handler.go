@@ -63,7 +63,11 @@ func (h *Handler) OnMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			}
 
-			command.Arguments[key].value = parts[i]
+			if len(parts) < i+1 {
+				continue
+			}
+
+			command.Arguments[key].value = strings.TrimSpace(parts[i])
 		}
 	}
 

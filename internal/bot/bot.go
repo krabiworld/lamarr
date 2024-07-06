@@ -49,5 +49,21 @@ func InitCommands() map[string]*command.Command {
 			Arguments:         nil,
 			Handler:           &information.ServerCommand{},
 		},
+		"user": {
+			Name:              "user",
+			Description:       "User information",
+			Category:          types.INFORMATION,
+			OwnerCommand:      false,
+			ModerationCommand: false,
+			Hidden:            false,
+			Arguments: map[string]*command.Argument{
+				"user": {
+					Name:        "user",
+					Description: "Specific user",
+					Required:    false,
+				},
+			},
+			Handler: &information.UserCommand{},
+		},
 	}
 }
