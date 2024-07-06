@@ -23,10 +23,10 @@ func Start(guildService services.GuildService) {
 
 	guildEvents := handlers.NewGuildEvents(guildService)
 
-	commandHandler := command.NewCommandHandler(InitCommands(), guildService)
+	commandHandler := command.NewCommandHandler(InitCommands(), guildService, cfg.Get().DiscordOwnerID)
 
 	session.AddHandler(guildEvents.OnGuildCreate)
-	session.AddHandler(commandHandler.OnMessage)
+	session.AddHandler(commandHandler.OnInteractionCreate)
 
 	if err := session.Open(); err != nil {
 		log.Fatal().Err(err).Send()

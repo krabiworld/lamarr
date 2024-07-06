@@ -17,6 +17,15 @@ func (s *GuildServiceImpl) Get(id string) (*models.Guild, error) {
 	return s.r.FindByID(id)
 }
 
+func (s *GuildServiceImpl) GetModRole(id string) (*string, error) {
+	guild, err := s.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return guild.Mod, nil
+}
+
 func (s *GuildServiceImpl) Create(guild *models.Guild) error {
 	return s.r.Create(guild)
 }

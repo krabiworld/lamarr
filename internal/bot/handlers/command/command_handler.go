@@ -7,27 +7,39 @@ import (
 )
 
 type Handler struct {
-	Commands map[string]*Command
-	s        services.GuildService
+	Commands     map[string]*Command
+	guildService services.GuildService
+	ownerId      string
 }
 
-func NewCommandHandler(commands map[string]*Command, s services.GuildService) *Handler {
+func NewCommandHandler(commands map[string]*Command, guildService services.GuildService, ownerId string) *Handler {
 	return &Handler{
-		Commands: commands,
-		s:        s,
+		Commands:     commands,
+		ownerId:      ownerId,
+		guildService: guildService,
 	}
 }
 
-func (h *Handler) OnMessage(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (h *Handler) OnInteractionCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	command, ok := h.Commands[i.ApplicationCommandData().Name]
 	if !ok {
 		return
 	}
 
 	ctx := &Context{
-		session: s,
-		event:   i,
-		command: command,
+		session:      s,
+		event:        i,
+		command:      command,
+		guildService: h.guildService,
+		ownerId:      h.ownerId,
+	}
+
+	if command.OwnerCommand && !ctx.Owner() {
+		return
+	}
+
+	if command.ModerationCommand && !ctx.Moderator() {
+		return
 	}
 
 	go func() {

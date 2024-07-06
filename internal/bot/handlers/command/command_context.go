@@ -2,14 +2,18 @@ package command
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/rs/zerolog/log"
+	"module-go/internal/services"
 	"module-go/internal/types"
 	"module-go/pkg/embed"
 )
 
 type Context struct {
-	session *discordgo.Session
-	event   *discordgo.InteractionCreate
-	command *Command
+	session      *discordgo.Session
+	event        *discordgo.InteractionCreate
+	command      *Command
+	guildService services.GuildService
+	ownerId      string
 }
 
 func (ctx *Context) Reply(embed *discordgo.MessageEmbed) error {
@@ -74,4 +78,36 @@ func (ctx *Context) MemberByID(id string) (*discordgo.Member, error) {
 
 func (ctx *Context) GuildOwner(ownerId string) (*discordgo.Member, error) {
 	return ctx.MemberByID(ownerId)
+}
+
+func (ctx *Context) Owner() bool {
+	return ctx.User().ID == ctx.ownerId
+}
+
+func (ctx *Context) Moderator() bool {
+	member := ctx.Member()
+
+	if ctx.HasPermission(member.Permissions, discordgo.PermissionAdministrator) || ctx.Owner() {
+		return true
+	}
+
+	modRole, err := ctx.guildService.GetModRole(ctx.event.GuildID)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return false
+	}
+
+	if modRole != nil {
+		for _, role := range member.Roles {
+			if role == *modRole {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (ctx *Context) HasPermission(dst int64, src int) bool {
+	return dst&int64(src) != 0
 }
