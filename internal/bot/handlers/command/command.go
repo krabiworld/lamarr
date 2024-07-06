@@ -1,23 +1,15 @@
 package command
 
 import (
+	"github.com/bwmarrin/discordgo"
 	"module-go/internal/types"
 )
 
-type Argument struct {
-	Name        string
-	Description string
-	Required    bool
-	value       string
-}
-
 type Command struct {
-	Name              string
-	Description       string
-	Category          types.Category
-	OwnerCommand      bool
-	ModerationCommand bool
-	Hidden            bool
-	Arguments         map[string]*Argument
-	Handler           ICommand
+	ApplicationCommand *discordgo.ApplicationCommand
+	Category           types.Category
+	OwnerCommand       bool
+	ModerationCommand  bool
+	Hidden             bool
+	Handler            ICommand
 }

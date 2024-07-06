@@ -5,11 +5,7 @@ import "module-go/internal/bot/handlers/command"
 type UserCommand struct{}
 
 func (cmd *UserCommand) Handle(ctx *command.Context) error {
-	member, err := ctx.ArgAsMember("user")
-	if err != nil {
-		member = ctx.Message.Member
-		member.User = ctx.Message.Author
-	}
+	user := ctx.OptionAsUser("user", ctx.User())
 
-	return ctx.ReplyError("Member name " + member.DisplayName())
+	return ctx.ReplyError("Member name " + user.Mention())
 }

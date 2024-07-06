@@ -32,6 +32,8 @@ func Start(guildService services.GuildService) {
 		log.Fatal().Err(err).Send()
 	}
 
+	RegisterCommands(session, commandHandler, cfg.Get().DiscordGuildID)
+
 	log.Info().Msg("Bot started")
 
 	select {}
@@ -40,30 +42,42 @@ func Start(guildService services.GuildService) {
 func InitCommands() map[string]*command.Command {
 	return map[string]*command.Command{
 		"server": {
-			Name:              "server",
-			Description:       "Information about server",
+			ApplicationCommand: &discordgo.ApplicationCommand{
+				Name:        "server",
+				Description: "Information about server",
+			},
 			Category:          types.INFORMATION,
 			OwnerCommand:      false,
 			ModerationCommand: false,
 			Hidden:            false,
-			Arguments:         nil,
 			Handler:           &information.ServerCommand{},
 		},
 		"user": {
-			Name:              "user",
-			Description:       "User information",
+			ApplicationCommand: &discordgo.ApplicationCommand{
+				Name:        "user",
+				Description: "Information about user",
+				Options: []*discordgo.ApplicationCommandOption{
+					{
+						Type:        discordgo.ApplicationCommandOptionUser,
+						Name:        "user",
+						Description: "Specific user",
+					},
+				},
+			},
 			Category:          types.INFORMATION,
 			OwnerCommand:      false,
 			ModerationCommand: false,
 			Hidden:            false,
-			Arguments: map[string]*command.Argument{
-				"user": {
-					Name:        "user",
-					Description: "Specific user",
-					Required:    false,
-				},
-			},
-			Handler: &information.UserCommand{},
+			Handler:           &information.UserCommand{},
 		},
+	}
+}
+
+func RegisterCommands(session *discordgo.Session, commandHandler *command.Handler, guildId string) {
+	for _, cmd := range commandHandler.Commands {
+		_, err := session.ApplicationCommandCreate(session.State.User.ID, guildId, cmd.ApplicationCommand)
+		if err != nil {
+			log.Error().Err(err).Send()
+		}
 	}
 }
