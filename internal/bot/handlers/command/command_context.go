@@ -3,6 +3,7 @@ package command
 import (
 	"github.com/bwmarrin/discordgo"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 )
 
 type Context struct {
@@ -21,8 +22,7 @@ func (ctx *Context) Reply(embed *discordgo.MessageEmbed) error {
 }
 
 func (ctx *Context) ReplyError(message string) error {
-	embed := &discordgo.MessageEmbed{Description: message, Color: types.ERROR.Int()}
-	return ctx.Reply(embed)
+	return ctx.Reply(embed.New().Description(message).Color(types.ERROR.Int()).Build())
 }
 
 func (ctx *Context) Option(key string) *discordgo.ApplicationCommandInteractionDataOption {

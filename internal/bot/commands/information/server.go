@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 	"strings"
 	"time"
 )
@@ -27,29 +28,21 @@ func (cmd *ServerCommand) Handle(ctx *command.Context) error {
 		return err
 	}
 
-	embed := &discordgo.MessageEmbed{
-		Title: fmt.Sprintf("Information about %s", guild.Name),
-		Color: types.DEFAULT.Int(),
-		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: guild.IconURL("128"),
-		},
-		Image: &discordgo.MessageEmbedImage{
-			URL: guild.BannerURL("512"),
-		},
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: fmt.Sprintf("ID: %s", guild.ID),
-		},
-		Fields: []*discordgo.MessageEmbedField{
-			cmd.MembersField(guild),
-			cmd.ChannelsField(guild),
-			cmd.StatusField(guild),
-			cmd.OwnerField(owner),
-			cmd.VerificationLevelField(guild),
-			cmd.CreatedAtField(createdAt),
-		},
-	}
+	e := embed.New().
+		Title(fmt.Sprintf("Information about %s", guild.Name)).
+		Color(types.DEFAULT.Int()).
+		Thumbnail(guild.IconURL("128")).
+		Image(guild.BannerURL("512")).
+		Footer(fmt.Sprintf("ID: %s", guild.ID)).
+		RawField(cmd.MembersField(guild)).
+		RawField(cmd.ChannelsField(guild)).
+		RawField(cmd.StatusField(guild)).
+		RawField(cmd.OwnerField(owner)).
+		RawField(cmd.VerificationLevelField(guild)).
+		RawField(cmd.CreatedAtField(createdAt)).
+		Build()
 
-	return ctx.Reply(embed)
+	return ctx.Reply(e)
 }
 
 func (cmd *ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.MessageEmbedField {

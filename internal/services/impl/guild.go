@@ -17,15 +17,6 @@ func (s *GuildServiceImpl) Get(id string) (*models.Guild, error) {
 	return s.r.FindByID(id)
 }
 
-func (s *GuildServiceImpl) GetPrefix(id string) (string, error) {
-	guild, err := s.Get(id)
-	if err != nil {
-		return "", err
-	}
-
-	return guild.Prefix, nil
-}
-
 func (s *GuildServiceImpl) Create(guild *models.Guild) error {
 	return s.r.Create(guild)
 }
