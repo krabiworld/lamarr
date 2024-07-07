@@ -49,6 +49,8 @@ func InitCommands() []*command.Command {
 }
 
 func RegisterCommands(session *discordgo.Session, handler *command.Handler, guildId string) {
+	log.Info().Int("count", len(handler.Commands)).Msg("Registering commands...")
+
 	for _, cmd := range handler.Commands {
 		_, err := session.ApplicationCommandCreate(session.State.User.ID, guildId, cmd.ApplicationCommand)
 		if err != nil {

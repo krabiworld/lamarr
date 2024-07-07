@@ -16,7 +16,15 @@ type Context struct {
 	ownerId      string
 }
 
-func (ctx *Context) Reply(message string) error {
+func (ctx *Context) Reply(message string, ephemeral ...bool) error {
+	data := &discordgo.InteractionResponseData{
+		Content: message,
+	}
+
+	if len(ephemeral) > 0 && ephemeral[0] {
+		data.Flags = discordgo.MessageFlagsEphemeral
+	}
+
 	return ctx.session.InteractionRespond(ctx.event.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -25,17 +33,23 @@ func (ctx *Context) Reply(message string) error {
 	})
 }
 
-func (ctx *Context) ReplyEmbed(embed *discordgo.MessageEmbed) error {
+func (ctx *Context) ReplyEmbed(embed *discordgo.MessageEmbed, ephemeral ...bool) error {
+	data := &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{embed},
+	}
+
+	if len(ephemeral) > 0 && ephemeral[0] {
+		data.Flags = discordgo.MessageFlagsEphemeral
+	}
+
 	return ctx.session.InteractionRespond(ctx.event.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
+		Data: data,
 	})
 }
 
 func (ctx *Context) ReplyError(message string) error {
-	return ctx.ReplyEmbed(embed.New().Description(message).Color(types.ColorError.Int()).Build())
+	return ctx.ReplyEmbed(embed.New().Description(message).Color(types.ColorError.Int()).Build(), true)
 }
 
 func (ctx *Context) Option(key string) *discordgo.ApplicationCommandInteractionDataOption {
