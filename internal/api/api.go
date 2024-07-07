@@ -25,6 +25,9 @@ func Start() {
 	app.Get("/commands", func(c fiber.Ctx) error {
 		return nil
 	})
+	app.Get("/stats", func(c fiber.Ctx) error {
+		return nil
+	})
 
 	go func() {
 		log.Fatal().Err(app.Listen(cfg.Get().ApiAddr, listenConfig)).Send()
