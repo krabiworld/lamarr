@@ -16,18 +16,13 @@ func NewUserCommand() *command.Command {
 	return command.New().
 		Name("user").
 		Description("Information about user").
-		Option(
-			discordgo.ApplicationCommandOptionUser,
-			"user",
-			"Specific user",
-			false,
-		).
+		Option(types.OptionUser, "user", "Specific user", false).
 		Category(types.CategoryInformation).
-		Handler(&UserCommand{}).
+		Handler(UserCommand{}).
 		Build()
 }
 
-func (cmd *UserCommand) Handle(ctx *command.Context) error {
+func (cmd UserCommand) Handle(ctx *command.Context) error {
 	guild, err := ctx.Guild()
 	if err != nil {
 		return err
@@ -75,10 +70,10 @@ func (cmd *UserCommand) Handle(ctx *command.Context) error {
 		e.Image(user.BannerURL("512"))
 	}
 
-	return ctx.Reply(e.Build())
+	return ctx.ReplyEmbed(e.Build())
 }
 
-func (cmd *UserCommand) Status(userStatus discordgo.Status) string {
+func (cmd UserCommand) Status(userStatus discordgo.Status) string {
 	var status string
 
 	switch userStatus {
@@ -95,7 +90,7 @@ func (cmd *UserCommand) Status(userStatus discordgo.Status) string {
 	return fmt.Sprintf("**Status:** %s", status)
 }
 
-func (cmd *UserCommand) Activities(userActivities []*discordgo.Activity) string {
+func (cmd UserCommand) Activities(userActivities []*discordgo.Activity) string {
 	var builder strings.Builder
 
 	for _, activity := range userActivities {
@@ -120,11 +115,11 @@ func (cmd *UserCommand) Activities(userActivities []*discordgo.Activity) string 
 	return strings.TrimSuffix(builder.String(), "\n")
 }
 
-func (cmd *UserCommand) JoinedAt(member *discordgo.Member) string {
+func (cmd UserCommand) JoinedAt(member *discordgo.Member) string {
 	return fmt.Sprintf("**Joined At:** <t:%[1]d:D> (<t:%[1]d:R>)", member.JoinedAt.Unix())
 }
 
-func (cmd *UserCommand) CreatedAt(user *discordgo.User) string {
+func (cmd UserCommand) CreatedAt(user *discordgo.User) string {
 	createdAt, err := discordgo.SnowflakeTimestamp(user.ID)
 	if err != nil {
 		return ""
@@ -133,7 +128,7 @@ func (cmd *UserCommand) CreatedAt(user *discordgo.User) string {
 	return fmt.Sprintf("**Created At:** <t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix())
 }
 
-func (cmd *UserCommand) Roles(roles []string) string {
+func (cmd UserCommand) Roles(roles []string) string {
 	var builder strings.Builder
 	for _, role := range roles {
 		builder.WriteString(fmt.Sprintf("<@&%s> ", role))

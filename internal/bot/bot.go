@@ -44,6 +44,7 @@ func InitCommands() []*command.Command {
 		information.NewServerCommand(),
 		information.NewUserCommand(),
 		utilities.NewAvatarCommand(),
+		utilities.NewRandomCommand(),
 	}
 }
 

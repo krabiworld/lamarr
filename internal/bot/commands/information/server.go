@@ -17,11 +17,11 @@ func NewServerCommand() *command.Command {
 		Name("server").
 		Description("Information about server").
 		Category(types.CategoryInformation).
-		Handler(&ServerCommand{}).
+		Handler(ServerCommand{}).
 		Build()
 }
 
-func (cmd *ServerCommand) Handle(ctx *command.Context) error {
+func (cmd ServerCommand) Handle(ctx *command.Context) error {
 	guild, err := ctx.Guild()
 	if err != nil {
 		return err
@@ -51,10 +51,10 @@ func (cmd *ServerCommand) Handle(ctx *command.Context) error {
 		RawField(cmd.CreatedAtField(createdAt)).
 		Build()
 
-	return ctx.Reply(e)
+	return ctx.ReplyEmbed(e)
 }
 
-func (cmd *ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
 	botCount, memberCount := 0, 0
 
 	for _, member := range guild.Members {
@@ -72,7 +72,7 @@ func (cmd *ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.Messag
 	}
 }
 
-func (cmd *ServerCommand) ChannelsField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) ChannelsField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
 	total, textChannels, voiceChannels, stageChannels := 0, 0, 0, 0
 
 	for _, channel := range guild.Channels {
@@ -111,7 +111,7 @@ func (cmd *ServerCommand) ChannelsField(guild *discordgo.Guild) *discordgo.Messa
 	}
 }
 
-func (cmd *ServerCommand) StatusField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) StatusField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
 	online, idle, dnd, offline := 0, 0, 0, 0
 
 	for _, presence := range guild.Presences {
@@ -152,7 +152,7 @@ func (cmd *ServerCommand) StatusField(guild *discordgo.Guild) *discordgo.Message
 	}
 }
 
-func (cmd *ServerCommand) OwnerField(owner *discordgo.Member) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) OwnerField(owner *discordgo.Member) *discordgo.MessageEmbedField {
 	return &discordgo.MessageEmbedField{
 		Name:   "Owner",
 		Value:  owner.Mention(),
@@ -160,7 +160,7 @@ func (cmd *ServerCommand) OwnerField(owner *discordgo.Member) *discordgo.Message
 	}
 }
 
-func (cmd *ServerCommand) VerificationLevelField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) VerificationLevelField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
 	var verificationLevel string
 
 	switch guild.VerificationLevel {
@@ -183,7 +183,7 @@ func (cmd *ServerCommand) VerificationLevelField(guild *discordgo.Guild) *discor
 	}
 }
 
-func (cmd *ServerCommand) CreatedAtField(createdAt time.Time) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) CreatedAtField(createdAt time.Time) *discordgo.MessageEmbedField {
 	return &discordgo.MessageEmbedField{
 		Name:   "Created At",
 		Value:  fmt.Sprintf("<t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix()),

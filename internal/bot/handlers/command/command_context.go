@@ -16,7 +16,16 @@ type Context struct {
 	ownerId      string
 }
 
-func (ctx *Context) Reply(embed *discordgo.MessageEmbed) error {
+func (ctx *Context) Reply(message string) error {
+	return ctx.session.InteractionRespond(ctx.event.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: message,
+		},
+	})
+}
+
+func (ctx *Context) ReplyEmbed(embed *discordgo.MessageEmbed) error {
 	return ctx.session.InteractionRespond(ctx.event.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
@@ -26,7 +35,7 @@ func (ctx *Context) Reply(embed *discordgo.MessageEmbed) error {
 }
 
 func (ctx *Context) ReplyError(message string) error {
-	return ctx.Reply(embed.New().Description(message).Color(types.ColorError.Int()).Build())
+	return ctx.ReplyEmbed(embed.New().Description(message).Color(types.ColorError.Int()).Build())
 }
 
 func (ctx *Context) Option(key string) *discordgo.ApplicationCommandInteractionDataOption {
@@ -50,6 +59,19 @@ func (ctx *Context) OptionAsUser(key string, defaultUser ...*discordgo.User) *di
 	}
 
 	return nil
+}
+
+func (ctx *Context) OptionAsInt(key string, defaultNumber ...int64) int64 {
+	opt := ctx.Option(key)
+	if opt != nil {
+		return opt.IntValue()
+	}
+
+	if len(defaultNumber) > 0 {
+		return defaultNumber[0]
+	}
+
+	return 0
 }
 
 func (ctx *Context) Guild() (*discordgo.Guild, error) {
