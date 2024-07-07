@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/bot/commands/information"
+	"module-go/internal/bot/commands/utilities"
 	"module-go/internal/bot/handlers"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/cfg"
@@ -69,6 +70,24 @@ func InitCommands() map[string]*command.Command {
 			ModerationCommand: false,
 			Hidden:            false,
 			Handler:           &information.UserCommand{},
+		},
+		"avatar": {
+			ApplicationCommand: &discordgo.ApplicationCommand{
+				Name:        "avatar",
+				Description: "User avatar",
+				Options: []*discordgo.ApplicationCommandOption{
+					{
+						Type:        discordgo.ApplicationCommandOptionUser,
+						Name:        "user",
+						Description: "Specific user",
+					},
+				},
+			},
+			Category:          types.UTILITIES,
+			OwnerCommand:      false,
+			ModerationCommand: false,
+			Hidden:            false,
+			Handler:           &utilities.AvatarCommand{},
 		},
 	}
 }
