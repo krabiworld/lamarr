@@ -30,7 +30,7 @@ func (cmd *ServerCommand) Handle(ctx *command.Context) error {
 
 	e := embed.New().
 		Title(fmt.Sprintf("Information about %s", guild.Name)).
-		Color(types.DEFAULT.Int()).
+		Color(types.ColorDefault.Int()).
 		Thumbnail(guild.IconURL("128")).
 		Image(guild.BannerURL("512")).
 		Footer(fmt.Sprintf("ID: %s", guild.ID)).

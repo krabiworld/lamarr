@@ -3,10 +3,10 @@ package types
 type Category string
 
 const (
-	INFORMATION Category = "Information"
-	MODERATION  Category = "Moderation"
-	SETTINGS    Category = "Settings"
-	UTILITIES   Category = "Utilities"
+	CategoryInformation Category = "Information"
+	CategoryModeration  Category = "Moderation"
+	CategorySettings    Category = "Settings"
+	CategoryUtilities   Category = "Utilities"
 )
 
 func (c Category) String() string {

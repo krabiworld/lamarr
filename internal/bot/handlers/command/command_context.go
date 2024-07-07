@@ -26,7 +26,7 @@ func (ctx *Context) Reply(embed *discordgo.MessageEmbed) error {
 }
 
 func (ctx *Context) ReplyError(message string) error {
-	return ctx.Reply(embed.New().Description(message).Color(types.ERROR.Int()).Build())
+	return ctx.Reply(embed.New().Description(message).Color(types.ColorError.Int()).Build())
 }
 
 func (ctx *Context) Option(key string) *discordgo.ApplicationCommandInteractionDataOption {

@@ -42,53 +42,26 @@ func Start(guildService services.GuildService) {
 
 func InitCommands() map[string]*command.Command {
 	return map[string]*command.Command{
-		"server": {
-			ApplicationCommand: &discordgo.ApplicationCommand{
-				Name:        "server",
-				Description: "Information about server",
-			},
-			Category:          types.INFORMATION,
-			OwnerCommand:      false,
-			ModerationCommand: false,
-			Hidden:            false,
-			Handler:           &information.ServerCommand{},
-		},
-		"user": {
-			ApplicationCommand: &discordgo.ApplicationCommand{
-				Name:        "user",
-				Description: "Information about user",
-				Options: []*discordgo.ApplicationCommandOption{
-					{
-						Type:        discordgo.ApplicationCommandOptionUser,
-						Name:        "user",
-						Description: "Specific user",
-					},
-				},
-			},
-			Category:          types.INFORMATION,
-			OwnerCommand:      false,
-			ModerationCommand: false,
-			Hidden:            false,
-			Handler:           &information.UserCommand{},
-		},
-		"avatar": {
-			ApplicationCommand: &discordgo.ApplicationCommand{
-				Name:        "avatar",
-				Description: "User avatar",
-				Options: []*discordgo.ApplicationCommandOption{
-					{
-						Type:        discordgo.ApplicationCommandOptionUser,
-						Name:        "user",
-						Description: "Specific user",
-					},
-				},
-			},
-			Category:          types.UTILITIES,
-			OwnerCommand:      false,
-			ModerationCommand: false,
-			Hidden:            false,
-			Handler:           &utilities.AvatarCommand{},
-		},
+		"server": command.New().
+			Name("server").
+			Description("Information about server").
+			Category(types.CategoryInformation).
+			Handler(&information.ServerCommand{}).
+			Build(),
+		"user": command.New().
+			Name("user").
+			Description("Information about user").
+			Option(discordgo.ApplicationCommandOptionUser, "user", "Specific user", false).
+			Category(types.CategoryInformation).
+			Handler(&information.UserCommand{}).
+			Build(),
+		"avatar": command.New().
+			Name("avatar").
+			Description("User avatar").
+			Option(discordgo.ApplicationCommandOptionUser, "user", "Specific user", false).
+			Category(types.CategoryUtilities).
+			Handler(&utilities.AvatarCommand{}).
+			Build(),
 	}
 }
 
