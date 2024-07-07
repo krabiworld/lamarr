@@ -12,9 +12,14 @@ type Handler struct {
 	ownerId      string
 }
 
-func NewCommandHandler(commands map[string]*Command, guildService services.GuildService, ownerId string) *Handler {
+func NewHandler(commands []*Command, guildService services.GuildService, ownerId string) *Handler {
+	m := make(map[string]*Command)
+	for _, command := range commands {
+		m[command.ApplicationCommand.Name] = command
+	}
+
 	return &Handler{
-		Commands:     commands,
+		Commands:     m,
 		ownerId:      ownerId,
 		guildService: guildService,
 	}

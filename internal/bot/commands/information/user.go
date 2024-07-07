@@ -5,11 +5,27 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"module-go/internal/bot/handlers/command"
+	"module-go/internal/types"
 	"module-go/pkg/embed"
 	"strings"
 )
 
 type UserCommand struct{}
+
+func NewUserCommand() *command.Command {
+	return command.New().
+		Name("user").
+		Description("Information about user").
+		Option(
+			discordgo.ApplicationCommandOptionUser,
+			"user",
+			"Specific user",
+			false,
+		).
+		Category(types.CategoryInformation).
+		Handler(&UserCommand{}).
+		Build()
+}
 
 func (cmd *UserCommand) Handle(ctx *command.Context) error {
 	guild, err := ctx.Guild()

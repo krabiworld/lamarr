@@ -9,7 +9,6 @@ import (
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/cfg"
 	"module-go/internal/services"
-	"module-go/internal/types"
 )
 
 func Start(guildService services.GuildService) {
@@ -24,7 +23,7 @@ func Start(guildService services.GuildService) {
 
 	guildEvents := handlers.NewGuildEvents(guildService)
 
-	commandHandler := command.NewCommandHandler(InitCommands(), guildService, cfg.Get().DiscordOwnerID)
+	commandHandler := command.NewHandler(InitCommands(), guildService, cfg.Get().DiscordOwnerID)
 
 	session.AddHandler(guildEvents.OnGuildCreate)
 	session.AddHandler(commandHandler.OnInteractionCreate)
@@ -40,33 +39,16 @@ func Start(guildService services.GuildService) {
 	select {}
 }
 
-func InitCommands() map[string]*command.Command {
-	return map[string]*command.Command{
-		"server": command.New().
-			Name("server").
-			Description("Information about server").
-			Category(types.CategoryInformation).
-			Handler(&information.ServerCommand{}).
-			Build(),
-		"user": command.New().
-			Name("user").
-			Description("Information about user").
-			Option(discordgo.ApplicationCommandOptionUser, "user", "Specific user", false).
-			Category(types.CategoryInformation).
-			Handler(&information.UserCommand{}).
-			Build(),
-		"avatar": command.New().
-			Name("avatar").
-			Description("User avatar").
-			Option(discordgo.ApplicationCommandOptionUser, "user", "Specific user", false).
-			Category(types.CategoryUtilities).
-			Handler(&utilities.AvatarCommand{}).
-			Build(),
+func InitCommands() []*command.Command {
+	return []*command.Command{
+		information.NewServerCommand(),
+		information.NewUserCommand(),
+		utilities.NewAvatarCommand(),
 	}
 }
 
-func RegisterCommands(session *discordgo.Session, commandHandler *command.Handler, guildId string) {
-	for _, cmd := range commandHandler.Commands {
+func RegisterCommands(session *discordgo.Session, handler *command.Handler, guildId string) {
+	for _, cmd := range handler.Commands {
 		_, err := session.ApplicationCommandCreate(session.State.User.ID, guildId, cmd.ApplicationCommand)
 		if err != nil {
 			log.Error().Err(err).Send()

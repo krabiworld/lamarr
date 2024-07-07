@@ -12,6 +12,15 @@ import (
 
 type ServerCommand struct{}
 
+func NewServerCommand() *command.Command {
+	return command.New().
+		Name("server").
+		Description("Information about server").
+		Category(types.CategoryInformation).
+		Handler(&ServerCommand{}).
+		Build()
+}
+
 func (cmd *ServerCommand) Handle(ctx *command.Context) error {
 	guild, err := ctx.Guild()
 	if err != nil {
