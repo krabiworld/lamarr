@@ -30,7 +30,7 @@ func (ctx *Context) ReplyEmbed(embed discord.Embed, ephemeral ...bool) error {
 }
 
 func (ctx *Context) ReplyError(message string) error {
-	embed := discord.NewEmbedBuilder().SetDescription(message).SetColor(types.ColorError.Int()).Build()
+	embed := discord.NewEmbedBuilder().SetDescription(message).SetColor(types.ColorError).Build()
 	return ctx.ReplyEmbed(embed, true)
 }
 

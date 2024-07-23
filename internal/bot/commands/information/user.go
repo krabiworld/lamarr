@@ -73,13 +73,13 @@ func (cmd UserCommand) Status(userStatus discord.OnlineStatus) string {
 
 	switch userStatus {
 	case discord.OnlineStatusOnline:
-		status = "Online"
+		status = types.EmojiOnline + "Online"
 	case discord.OnlineStatusIdle:
-		status = "Idle"
+		status = types.EmojiIdle + "Idle"
 	case discord.OnlineStatusOffline:
-		status = "Do Not Disturb"
+		status = types.EmojiOffline + "Do Not Disturb"
 	default:
-		status = "Offline"
+		status = types.EmojiOffline + "Offline"
 	}
 
 	return fmt.Sprintf("**Status:** %s", status)

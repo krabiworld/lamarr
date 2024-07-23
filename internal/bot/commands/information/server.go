@@ -47,7 +47,7 @@ func (cmd ServerCommand) Handle(ctx *command.Context) error {
 
 	e := discord.NewEmbedBuilder().
 		SetTitle(fmt.Sprintf("Information about %s", guild.Name)).
-		SetColor(types.ColorDefault.Int()).
+		SetColor(types.ColorDefault).
 		SetFooter(fmt.Sprintf("ID: %s", guild.ID), "").
 		AddField(cmd.MembersField(members)).
 		AddField(cmd.ChannelsField(channels)).
@@ -139,19 +139,19 @@ func (cmd ServerCommand) StatusField(presences []discord.Presence) (string, stri
 	var builder strings.Builder
 
 	if online > 0 {
-		builder.WriteString(fmt.Sprintf("Online: **%d**\n", online))
+		builder.WriteString(fmt.Sprintf("%sOnline: **%d**\n", types.EmojiOnline, online))
 	}
 
 	if idle > 0 {
-		builder.WriteString(fmt.Sprintf("Idle: **%d**\n", idle))
+		builder.WriteString(fmt.Sprintf("%sIdle: **%d**\n", types.EmojiIdle, idle))
 	}
 
 	if dnd > 0 {
-		builder.WriteString(fmt.Sprintf("Do Not Disturb: **%d**\n", dnd))
+		builder.WriteString(fmt.Sprintf("%sDo Not Disturb: **%d**\n", types.EmojiDnd, dnd))
 	}
 
 	if offline > 0 {
-		builder.WriteString(fmt.Sprintf("Offline: **%d**\n", offline))
+		builder.WriteString(fmt.Sprintf("%sOffline: **%d**\n", types.EmojiOffline, offline))
 	}
 
 	name := "By Status"
