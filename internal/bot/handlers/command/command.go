@@ -1,12 +1,12 @@
 package command
 
 import (
-	"github.com/bwmarrin/discordgo"
+	"github.com/disgoorg/disgo/discord"
 	"module-go/internal/types"
 )
 
 type Command struct {
-	ApplicationCommand *discordgo.ApplicationCommand
+	ApplicationCommand discord.SlashCommandCreate
 	Category           types.Category
 	OwnerCommand       bool
 	ModerationCommand  bool

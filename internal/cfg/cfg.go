@@ -18,7 +18,6 @@ type Config struct {
 	// Discord
 	DiscordOwnerID string `env:"DISCORD_OWNER_ID"`
 	DiscordGuildID string `env:"DISCORD_GUILD_ID"`
-	DiscordBotID   string `env:"DISCORD_BOT_ID"`
 	DiscordToken   string `env:"DISCORD_TOKEN"`
 
 	// Database

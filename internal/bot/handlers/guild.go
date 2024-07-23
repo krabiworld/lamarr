@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"errors"
-	"github.com/bwmarrin/discordgo"
+	"github.com/disgoorg/disgo/events"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 	"module-go/internal/db/models"
@@ -17,15 +17,15 @@ func NewGuildEvents(s services.GuildService) *GuildEvents {
 	return &GuildEvents{s: s}
 }
 
-func (e *GuildEvents) OnGuildCreate(_ *discordgo.Session, g *discordgo.GuildCreate) {
-	_, err := e.s.Get(g.ID)
+func (g *GuildEvents) OnGuildCreate(e events.GuildJoin) {
+	_, err := g.s.Get(e.GuildID)
 	if err == nil {
 		return
 	}
 
 	// if record not found - create, else log error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if err := e.s.Create(&models.Guild{ID: g.ID}); err != nil {
+		if err := g.s.Create(&models.Guild{ID: e.GuildID.String()}); err != nil {
 			log.Error().Err(err).Send()
 		}
 		return

@@ -1,7 +1,7 @@
 package command
 
 import (
-	"github.com/bwmarrin/discordgo"
+	"github.com/disgoorg/disgo/discord"
 	"module-go/internal/types"
 )
 
@@ -11,7 +11,7 @@ type Builder struct {
 
 func New() *Builder {
 	return &Builder{cmd: &Command{
-		ApplicationCommand: &discordgo.ApplicationCommand{},
+		ApplicationCommand: discord.SlashCommandCreate{},
 	}}
 }
 
@@ -25,9 +25,17 @@ func (b *Builder) Description(description string) *Builder {
 	return b
 }
 
-func (b *Builder) Option(optionType discordgo.ApplicationCommandOptionType, name, description string, required bool) *Builder {
-	b.cmd.ApplicationCommand.Options = append(b.cmd.ApplicationCommand.Options, &discordgo.ApplicationCommandOption{
-		Type:        optionType,
+func (b *Builder) OptionUser(name, description string, required bool) *Builder {
+	b.cmd.ApplicationCommand.Options = append(b.cmd.ApplicationCommand.Options, discord.ApplicationCommandOptionUser{
+		Name:        name,
+		Description: description,
+		Required:    required,
+	})
+	return b
+}
+
+func (b *Builder) OptionInt(name, description string, required bool) *Builder {
+	b.cmd.ApplicationCommand.Options = append(b.cmd.ApplicationCommand.Options, discord.ApplicationCommandOptionInt{
 		Name:        name,
 		Description: description,
 		Required:    required,

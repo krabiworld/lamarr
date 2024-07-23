@@ -2,10 +2,9 @@ package information
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
+	"github.com/disgoorg/disgo/discord"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
-	"module-go/pkg/embed"
 	"strings"
 	"time"
 )
@@ -27,37 +26,51 @@ func (cmd ServerCommand) Handle(ctx *command.Context) error {
 		return err
 	}
 
-	owner, err := ctx.GuildOwner(guild.OwnerID)
+	members, err := ctx.Members()
 	if err != nil {
 		return err
 	}
 
-	createdAt, err := discordgo.SnowflakeTimestamp(guild.ID)
+	channels, err := ctx.Channels()
 	if err != nil {
 		return err
 	}
 
-	e := embed.New().
-		Title(fmt.Sprintf("Information about %s", guild.Name)).
-		Color(types.ColorDefault.Int()).
-		Thumbnail(guild.IconURL("128")).
-		Image(guild.BannerURL("512")).
-		Footer(fmt.Sprintf("ID: %s", guild.ID)).
-		RawField(cmd.MembersField(guild)).
-		RawField(cmd.ChannelsField(guild)).
-		RawField(cmd.StatusField(guild)).
-		RawField(cmd.OwnerField(owner)).
-		RawField(cmd.VerificationLevelField(guild)).
-		RawField(cmd.CreatedAtField(createdAt)).
-		Build()
+	presences := ctx.Presences()
 
-	return ctx.ReplyEmbed(e)
+	owner, err := ctx.MemberByID(guild.OwnerID)
+	if err != nil {
+		return err
+	}
+
+	createdAt := guild.ID.Time()
+
+	e := discord.NewEmbedBuilder().
+		SetTitle(fmt.Sprintf("Information about %s", guild.Name)).
+		SetColor(types.ColorDefault.Int()).
+		SetFooter(fmt.Sprintf("ID: %s", guild.ID), "").
+		AddField(cmd.MembersField(members)).
+		AddField(cmd.ChannelsField(channels)).
+		AddField(cmd.StatusField(presences)).
+		AddField(cmd.OwnerField(owner)).
+		AddField(cmd.VerificationLevelField(guild)).
+		AddField(cmd.CreatedAtField(createdAt))
+
+	if guild.Icon != nil {
+		e.SetThumbnail(*guild.IconURL())
+	}
+
+	if guild.Banner != nil {
+		e.SetImage(*guild.BannerURL())
+	}
+
+	return ctx.ReplyEmbed(e.Build())
 }
 
-func (cmd ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) MembersField(members []discord.Member) (string, string, bool) {
 	botCount, memberCount := 0, 0
 
-	for _, member := range guild.Members {
+	for _, member := range members {
 		if member.User.Bot {
 			botCount++
 		} else {
@@ -65,23 +78,21 @@ func (cmd ServerCommand) MembersField(guild *discordgo.Guild) *discordgo.Message
 		}
 	}
 
-	return &discordgo.MessageEmbedField{
-		Name:   fmt.Sprintf("Members (%d)", guild.MemberCount),
-		Value:  fmt.Sprintf("Members: **%d**\nBots: **%d**", memberCount, botCount),
-		Inline: true,
-	}
+	name := fmt.Sprintf("Members (%d)", len(members))
+	value := fmt.Sprintf("Members: **%d**\nBots: **%d**", memberCount, botCount)
+	return name, value, true
 }
 
-func (cmd ServerCommand) ChannelsField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) ChannelsField(channels []discord.GuildChannel) (string, string, bool) {
 	total, textChannels, voiceChannels, stageChannels := 0, 0, 0, 0
 
-	for _, channel := range guild.Channels {
-		switch channel.Type {
-		case discordgo.ChannelTypeGuildText:
+	for _, channel := range channels {
+		switch channel.Type() {
+		case discord.ChannelTypeGuildText:
 			textChannels++
-		case discordgo.ChannelTypeGuildVoice:
+		case discord.ChannelTypeGuildVoice:
 			voiceChannels++
-		case discordgo.ChannelTypeGuildStageVoice:
+		case discord.ChannelTypeGuildStageVoice:
 			stageChannels++
 		default:
 			continue
@@ -104,23 +115,21 @@ func (cmd ServerCommand) ChannelsField(guild *discordgo.Guild) *discordgo.Messag
 		builder.WriteString(fmt.Sprintf("Stage: **%d**\n", stageChannels))
 	}
 
-	return &discordgo.MessageEmbedField{
-		Name:   fmt.Sprintf("Channels (%d)", total),
-		Value:  strings.TrimSpace(builder.String()),
-		Inline: true,
-	}
+	name := fmt.Sprintf("Channels (%d)", total)
+	value := strings.TrimSpace(builder.String())
+	return name, value, true
 }
 
-func (cmd ServerCommand) StatusField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) StatusField(presences []discord.Presence) (string, string, bool) {
 	online, idle, dnd, offline := 0, 0, 0, 0
 
-	for _, presence := range guild.Presences {
+	for _, presence := range presences {
 		switch presence.Status {
-		case discordgo.StatusOnline:
+		case discord.OnlineStatusOnline:
 			online++
-		case discordgo.StatusIdle:
+		case discord.OnlineStatusIdle:
 			idle++
-		case discordgo.StatusDoNotDisturb:
+		case discord.OnlineStatusDND:
 			dnd++
 		default:
 			offline++
@@ -145,48 +154,36 @@ func (cmd ServerCommand) StatusField(guild *discordgo.Guild) *discordgo.MessageE
 		builder.WriteString(fmt.Sprintf("Offline: **%d**\n", offline))
 	}
 
-	return &discordgo.MessageEmbedField{
-		Name:   "By Status",
-		Value:  strings.TrimSpace(builder.String()),
-		Inline: true,
-	}
+	name := "By Status"
+	value := strings.TrimSpace(builder.String())
+	return name, value, true
 }
 
-func (cmd ServerCommand) OwnerField(owner *discordgo.Member) *discordgo.MessageEmbedField {
-	return &discordgo.MessageEmbedField{
-		Name:   "Owner",
-		Value:  owner.Mention(),
-		Inline: true,
-	}
+func (cmd ServerCommand) OwnerField(owner discord.Member) (string, string, bool) {
+	return "Owner", owner.Mention(), true
 }
 
-func (cmd ServerCommand) VerificationLevelField(guild *discordgo.Guild) *discordgo.MessageEmbedField {
+func (cmd ServerCommand) VerificationLevelField(guild discord.Guild) (string, string, bool) {
 	var verificationLevel string
 
 	switch guild.VerificationLevel {
-	case discordgo.VerificationLevelNone:
+	case discord.VerificationLevelNone:
 		verificationLevel = "None"
-	case discordgo.VerificationLevelLow:
+	case discord.VerificationLevelLow:
 		verificationLevel = "Low"
-	case discordgo.VerificationLevelMedium:
+	case discord.VerificationLevelMedium:
 		verificationLevel = "Medium"
-	case discordgo.VerificationLevelHigh:
+	case discord.VerificationLevelHigh:
 		verificationLevel = "High"
-	case discordgo.VerificationLevelVeryHigh:
+	case discord.VerificationLevelVeryHigh:
 		verificationLevel = "Very High"
 	}
 
-	return &discordgo.MessageEmbedField{
-		Name:   "Verification Level",
-		Value:  verificationLevel,
-		Inline: true,
-	}
+	return "Verification Level", verificationLevel, true
 }
 
-func (cmd ServerCommand) CreatedAtField(createdAt time.Time) *discordgo.MessageEmbedField {
-	return &discordgo.MessageEmbedField{
-		Name:   "Created At",
-		Value:  fmt.Sprintf("<t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix()),
-		Inline: true,
-	}
+func (cmd ServerCommand) CreatedAtField(createdAt time.Time) (string, string, bool) {
+	name := "Created At"
+	value := fmt.Sprintf("<t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix())
+	return name, value, true
 }

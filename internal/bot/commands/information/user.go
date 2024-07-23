@@ -3,10 +3,10 @@ package information
 import (
 	"errors"
 	"fmt"
-	"github.com/bwmarrin/discordgo"
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/snowflake/v2"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
-	"module-go/pkg/embed"
 	"strings"
 )
 
@@ -16,33 +16,21 @@ func NewUserCommand() *command.Command {
 	return command.New().
 		Name("user").
 		Description("Information about user").
-		Option(types.OptionUser, "user", "Specific user", false).
+		OptionUser("user", "Specific user", false).
 		Category(types.CategoryInformation).
 		Handler(UserCommand{}).
 		Build()
 }
 
 func (cmd UserCommand) Handle(ctx *command.Context) error {
-	guild, err := ctx.Guild()
-	if err != nil {
-		return err
-	}
-
-	user := ctx.OptionAsUser("user", ctx.User())
+	user, _ := ctx.OptionAsUser("user", ctx.User())
 	member, err := ctx.MemberByID(user.ID)
 	if err != nil {
 		return err
 	}
 
-	var userPresence *discordgo.Presence
-	for _, presence := range guild.Presences {
-		if presence.User.ID == user.ID {
-			userPresence = presence
-			break
-		}
-	}
-
-	if userPresence == nil {
+	userPresence, ok := ctx.Presence(user.ID)
+	if !ok {
 		return errors.New("user presence not found")
 	}
 
@@ -55,33 +43,40 @@ func (cmd UserCommand) Handle(ctx *command.Context) error {
 		cmd.CreatedAt(user),
 	)
 
-	e := embed.New().
-		Author(user.Username, user.AvatarURL("64")).
-		Color(user.AccentColor).
-		Description(description).
-		Thumbnail(user.AvatarURL("512")).
-		Footer("ID: " + user.ID)
+	e := discord.NewEmbedBuilder().
+		SetAuthor(user.Username, "", "").
+		SetDescription(description).
+		SetFooter("ID: "+user.ID.String(), "")
 
-	if len(member.Roles) > 0 {
-		e.Field("Roles", cmd.Roles(member.Roles), false)
+	if user.AccentColor != nil {
+		e.SetColor(*user.AccentColor)
 	}
 
-	if user.Banner != "" {
-		e.Image(user.BannerURL("512"))
+	if user.Avatar != nil {
+		e.SetAuthor(user.Username, "", *user.AvatarURL())
+		e.SetThumbnail(*user.AvatarURL())
+	}
+
+	if len(member.RoleIDs) > 0 {
+		e.AddField("Roles", cmd.Roles(member.RoleIDs), false)
+	}
+
+	if user.Banner != nil {
+		e.SetImage(*user.BannerURL())
 	}
 
 	return ctx.ReplyEmbed(e.Build())
 }
 
-func (cmd UserCommand) Status(userStatus discordgo.Status) string {
+func (cmd UserCommand) Status(userStatus discord.OnlineStatus) string {
 	var status string
 
 	switch userStatus {
-	case discordgo.StatusOnline:
+	case discord.OnlineStatusOnline:
 		status = "Online"
-	case discordgo.StatusIdle:
+	case discord.OnlineStatusIdle:
 		status = "Idle"
-	case discordgo.StatusDoNotDisturb:
+	case discord.OnlineStatusOffline:
 		status = "Do Not Disturb"
 	default:
 		status = "Offline"
@@ -90,22 +85,22 @@ func (cmd UserCommand) Status(userStatus discordgo.Status) string {
 	return fmt.Sprintf("**Status:** %s", status)
 }
 
-func (cmd UserCommand) Activities(userActivities []*discordgo.Activity) string {
+func (cmd UserCommand) Activities(userActivities []discord.Activity) string {
 	var builder strings.Builder
 
 	for _, activity := range userActivities {
 		switch activity.Type {
-		case discordgo.ActivityTypeGame:
+		case discord.ActivityTypeGame:
 			builder.WriteString("**Playing:** ")
-		case discordgo.ActivityTypeStreaming:
+		case discord.ActivityTypeStreaming:
 			builder.WriteString("**Streaming:** ")
-		case discordgo.ActivityTypeListening:
+		case discord.ActivityTypeListening:
 			builder.WriteString("**Listening to:** ")
-		case discordgo.ActivityTypeWatching:
+		case discord.ActivityTypeWatching:
 			builder.WriteString("**Watching:** ")
-		case discordgo.ActivityTypeCustom:
+		case discord.ActivityTypeCustom:
 			builder.WriteString("**Custom:** ")
-		case discordgo.ActivityTypeCompeting:
+		case discord.ActivityTypeCompeting:
 			builder.WriteString("**Competing to:** ")
 		}
 		builder.WriteString(activity.Name)
@@ -115,23 +110,18 @@ func (cmd UserCommand) Activities(userActivities []*discordgo.Activity) string {
 	return strings.TrimSuffix(builder.String(), "\n")
 }
 
-func (cmd UserCommand) JoinedAt(member *discordgo.Member) string {
+func (cmd UserCommand) JoinedAt(member discord.Member) string {
 	return fmt.Sprintf("**Joined At:** <t:%[1]d:D> (<t:%[1]d:R>)", member.JoinedAt.Unix())
 }
 
-func (cmd UserCommand) CreatedAt(user *discordgo.User) string {
-	createdAt, err := discordgo.SnowflakeTimestamp(user.ID)
-	if err != nil {
-		return ""
-	}
-
-	return fmt.Sprintf("**Created At:** <t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix())
+func (cmd UserCommand) CreatedAt(user discord.User) string {
+	return fmt.Sprintf("**Created At:** <t:%[1]d:D> (<t:%[1]d:R>)", user.CreatedAt().Unix())
 }
 
-func (cmd UserCommand) Roles(roles []string) string {
+func (cmd UserCommand) Roles(roles []snowflake.ID) string {
 	var builder strings.Builder
 	for _, role := range roles {
-		builder.WriteString(fmt.Sprintf("<@&%s> ", role))
+		builder.WriteString(fmt.Sprintf("<@&%s> ", role.String()))
 	}
 	return strings.TrimSuffix(builder.String(), " ")
 }
