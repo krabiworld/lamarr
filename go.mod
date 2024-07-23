@@ -6,17 +6,17 @@ require (
 	github.com/caarlos0/env/v11 v11.1.0
 	github.com/disgoorg/disgo v0.18.9
 	github.com/disgoorg/snowflake/v2 v2.0.3
-	github.com/gofiber/fiber/v3 v3.0.0-beta.2
+	github.com/gofiber/fiber/v3 v3.0.0-beta.3
 	github.com/joho/godotenv v1.5.1
 	github.com/rs/zerolog v1.33.0
 	gorm.io/driver/postgres v1.5.9
-	gorm.io/gorm v1.25.10
+	gorm.io/gorm v1.25.11
 )
 
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/disgoorg/json v1.1.0 // indirect
-	github.com/gofiber/utils/v2 v2.0.0-beta.4 // indirect
+	github.com/gofiber/utils/v2 v2.0.0-beta.5 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
