@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
+	"github.com/disgoorg/disgo/cache"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/snowflake/v2"
@@ -27,6 +28,7 @@ func Start(guildService services.GuildService) {
 	client, err := disgo.New(
 		cfg.Get().DiscordToken,
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentsAll)),
+		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagMembers, cache.FlagPresences)),
 		bot.WithEventListenerFunc(commandHandler.OnInteractionCreate),
 		bot.WithEventListenerFunc(guildEvents.OnGuildCreate),
 	)
