@@ -2,10 +2,10 @@
 
 Rewritten multipurpose Discord bot Module in Golang.
 
-# Roadmap
+## Roadmap
 
-Current progress: 17.86%<br>
-_<sup>(completed checkboxes/all checkboxes*100)</sup>_
+Current progress: 17%<br>
+_<sup>(checked checkboxes/all checkboxes*100)</sup>_
 
 ### Commands
 
