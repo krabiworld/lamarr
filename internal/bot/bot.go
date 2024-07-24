@@ -15,6 +15,7 @@ import (
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/cfg"
 	"module-go/internal/services"
+	"module-go/internal/types"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func Start(guildService services.GuildService) {
 	ownerId := snowflake.MustParse(cfg.Get().DiscordOwnerID)
 	guildId := snowflake.MustParse(cfg.Get().DiscordGuildID)
 
-	commandHandler := command.NewHandler(InitCommands(), guildService, ownerId)
+	commandHandler := command.NewHandler(InitCommands(), InitCategories(), guildService, ownerId)
 	guildEvents := handlers.NewGuildEvents(guildService)
 
 	client, err := disgo.New(
@@ -50,8 +51,9 @@ func Start(guildService services.GuildService) {
 	select {}
 }
 
-func InitCommands() []*command.Command {
-	return []*command.Command{
+func InitCommands() []command.Command {
+	return []command.Command{
+		information.NewHelpCommand(),
 		information.NewServerCommand(),
 		information.NewUserCommand(),
 		utilities.NewAvatarCommand(),
@@ -59,15 +61,20 @@ func InitCommands() []*command.Command {
 	}
 }
 
+func InitCategories() []types.Category {
+	return []types.Category{
+		types.CategoryInformation,
+		types.CategoryUtilities,
+	}
+}
+
 func RegisterCommands(client bot.Client, handler *command.Handler, guildId snowflake.ID) {
-	log.Info().Int("count", len(handler.Commands)).Msg("Registering commands...")
+	log.Info().Int("count", len(handler.CommandsList)).Msg("Registering commands...")
 
-	commands := make([]discord.ApplicationCommandCreate, len(handler.Commands))
+	commands := make([]discord.ApplicationCommandCreate, len(handler.CommandsList))
 
-	i := 0
-	for _, cmd := range handler.Commands {
+	for i, cmd := range handler.CommandsList {
 		commands[i] = cmd.ApplicationCommand
-		i++
 	}
 
 	_, err := client.Rest().SetGuildCommands(client.ApplicationID(), guildId, commands)

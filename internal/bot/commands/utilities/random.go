@@ -9,7 +9,7 @@ import (
 
 type RandomCommand struct{}
 
-func NewRandomCommand() *command.Command {
+func NewRandomCommand() command.Command {
 	return command.New().
 		Name("rand").
 		Description("Get a random number").

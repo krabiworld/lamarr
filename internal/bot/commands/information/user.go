@@ -12,7 +12,7 @@ import (
 
 type UserCommand struct{}
 
-func NewUserCommand() *command.Command {
+func NewUserCommand() command.Command {
 	return command.New().
 		Name("user").
 		Description("Information about user").

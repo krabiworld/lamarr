@@ -7,6 +7,7 @@ const (
 	CategoryModeration  Category = "Moderation"
 	CategorySettings    Category = "Settings"
 	CategoryUtilities   Category = "Utilities"
+	CategoryUnspecified Category = "Unspecified"
 )
 
 func (c Category) String() string {

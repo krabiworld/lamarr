@@ -9,7 +9,7 @@ import (
 
 type AvatarCommand struct{}
 
-func NewAvatarCommand() *command.Command {
+func NewAvatarCommand() command.Command {
 	return command.New().
 		Name("avatar").
 		Description("User avatar").

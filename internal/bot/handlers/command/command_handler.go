@@ -5,37 +5,46 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/services"
+	"module-go/internal/types"
 )
 
 type Handler struct {
-	Commands     map[string]*Command
+	CommandsMap  map[string]Command
+	CommandsList []Command
+	Categories   []types.Category
 	guildService services.GuildService
 	ownerId      snowflake.ID
 }
 
-func NewHandler(commands []*Command, guildService services.GuildService, ownerId snowflake.ID) *Handler {
-	m := make(map[string]*Command)
-	for _, command := range commands {
+func NewHandler(commands []Command, categories []types.Category, guildService services.GuildService, ownerId snowflake.ID) *Handler {
+	m := make(map[string]Command, len(commands))
+	l := make([]Command, len(commands))
+	for i, command := range commands {
 		m[command.ApplicationCommand.Name] = command
+		l[i] = command
 	}
 
 	return &Handler{
-		Commands:     m,
-		ownerId:      ownerId,
+		CommandsMap:  m,
+		CommandsList: l,
+		Categories:   categories,
 		guildService: guildService,
+		ownerId:      ownerId,
 	}
 }
 
 func (h *Handler) OnInteractionCreate(event *events.ApplicationCommandInteractionCreate) {
-	command, ok := h.Commands[event.Data.CommandName()]
+	command, ok := h.CommandsMap[event.Data.CommandName()]
 	if !ok {
 		return
 	}
 
 	ctx := &Context{
-		e:       event,
-		service: h.guildService,
-		owner:   h.ownerId,
+		e:          event,
+		commands:   h.CommandsList,
+		categories: h.Categories,
+		service:    h.guildService,
+		owner:      h.ownerId,
 	}
 
 	if command.OwnerCommand && !ctx.Owner() {

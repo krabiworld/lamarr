@@ -10,9 +10,11 @@ import (
 )
 
 type Context struct {
-	e       *events.ApplicationCommandInteractionCreate
-	service services.GuildService
-	owner   snowflake.ID
+	e          *events.ApplicationCommandInteractionCreate
+	commands   []Command
+	categories []types.Category
+	service    services.GuildService
+	owner      snowflake.ID
 }
 
 func (ctx *Context) Reply(message string, ephemeral ...bool) error {
@@ -72,6 +74,19 @@ func (ctx *Context) OptionAsInt(key string, defaultNumber ...int64) (int64, bool
 	}
 
 	return 0, false
+}
+
+func (ctx *Context) OptionAsString(key string, defaultString ...string) (string, bool) {
+	str, ok := ctx.Data().OptString(key)
+	if ok {
+		return str, true
+	}
+
+	if len(defaultString) > 0 {
+		return defaultString[0], true
+	}
+
+	return "", false
 }
 
 func (ctx *Context) Guild() (discord.Guild, error) {
@@ -153,4 +168,12 @@ func (ctx *Context) Moderator() bool {
 	}
 
 	return false
+}
+
+func (ctx *Context) Commands() []Command {
+	return ctx.commands
+}
+
+func (ctx *Context) Categories() []types.Category {
+	return ctx.categories
 }

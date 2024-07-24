@@ -11,7 +11,7 @@ import (
 
 type ServerCommand struct{}
 
-func NewServerCommand() *command.Command {
+func NewServerCommand() command.Command {
 	return command.New().
 		Name("server").
 		Description("Information about server").

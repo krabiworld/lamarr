@@ -6,11 +6,11 @@ import (
 )
 
 type Builder struct {
-	cmd *Command
+	cmd Command
 }
 
 func New() *Builder {
-	return &Builder{cmd: &Command{
+	return &Builder{cmd: Command{
 		ApplicationCommand: discord.SlashCommandCreate{},
 	}}
 }
@@ -43,6 +43,15 @@ func (b *Builder) OptionInt(name, description string, required bool) *Builder {
 	return b
 }
 
+func (b *Builder) OptionString(name, description string, required bool) *Builder {
+	b.cmd.ApplicationCommand.Options = append(b.cmd.ApplicationCommand.Options, discord.ApplicationCommandOptionString{
+		Name:        name,
+		Description: description,
+		Required:    required,
+	})
+	return b
+}
+
 func (b *Builder) Category(category types.Category) *Builder {
 	b.cmd.Category = category
 	return b
@@ -53,6 +62,6 @@ func (b *Builder) Handler(handler ICommand) *Builder {
 	return b
 }
 
-func (b *Builder) Build() *Command {
+func (b *Builder) Build() Command {
 	return b.cmd
 }
