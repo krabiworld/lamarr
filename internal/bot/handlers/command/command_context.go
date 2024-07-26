@@ -1,8 +1,10 @@
 package command
 
 import (
+	"github.com/disgoorg/disgo/cache"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/services"
@@ -176,4 +178,12 @@ func (ctx *Context) Commands() []Command {
 
 func (ctx *Context) Categories() []types.Category {
 	return ctx.categories
+}
+
+func (ctx *Context) Caches() cache.Caches {
+	return ctx.e.Client().Caches()
+}
+
+func (ctx *Context) Gateway() gateway.Gateway {
+	return ctx.e.Client().Gateway()
 }

@@ -4,7 +4,7 @@ Rewritten multipurpose Discord bot Module in Golang.
 
 ## Roadmap
 
-Current progress: 17%<br>
+Current progress: 21%<br>
 _<sup>(checked checkboxes/all checkboxes*100)</sup>_
 
 ### Commands
@@ -13,7 +13,7 @@ _<sup>(checked checkboxes/all checkboxes*100)</sup>_
 
 - [x] Help
 - [x] Server
-- [ ] Stats
+- [x] Stats
 - [x] User
 
 #### Moderation

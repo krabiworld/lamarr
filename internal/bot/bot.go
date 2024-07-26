@@ -29,7 +29,12 @@ func Start(guildService services.GuildService) {
 	client, err := disgo.New(
 		cfg.Get().DiscordToken,
 		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentsAll)),
-		bot.WithCacheConfigOpts(cache.WithCaches(cache.FlagGuilds, cache.FlagMembers, cache.FlagPresences)),
+		bot.WithCacheConfigOpts(cache.WithCaches(
+			cache.FlagGuilds,
+			cache.FlagMembers,
+			cache.FlagPresences,
+			cache.FlagChannels,
+		)),
 		bot.WithEventListenerFunc(commandHandler.OnInteractionCreate),
 		bot.WithEventListenerFunc(guildEvents.OnGuildCreate),
 	)
@@ -55,6 +60,7 @@ func InitCommands() []command.Command {
 	return []command.Command{
 		information.NewHelpCommand(),
 		information.NewServerCommand(),
+		information.NewStatsCommand(),
 		information.NewUserCommand(),
 		utilities.NewAvatarCommand(),
 		utilities.NewRandomCommand(),
