@@ -9,46 +9,15 @@ _<sup>(checked checkboxes/all checkboxes*100)</sup>_
 
 ### Commands
 
-#### Information
+- [x] Information (help, server, stats, user)
+- [ ] Moderation (ban, unban, clear, kick, mute, unmute, warn, warns, remwarn, slowmode)
+- [ ] Music (play, pause, resume, skip) 
+- [ ] Owner eval command
+- [ ] Utilities (~~avatar~~, ~~random~~, emoji)
 
-- [x] Help
-- [x] Server
-- [x] Stats
-- [x] User
-
-#### Moderation
-
-- [ ] Ban
-- [ ] Unban
-- [ ] Clear
-- [ ] Kick
-- [ ] Mute
-- [ ] Unmute
-- [ ] Warn
-- [ ] Warns
-- [ ] Remwarn
-- [ ] Slowmode
-
-#### Music
-
-- [ ] Play
-- [ ] Pause
-- [ ] Resume
-- [ ] Skip
-
-#### Owner
-
-- [ ] Eval
-
-#### Settings
+### Settings
 
 I'm considering creating a website instead of commands
-
-#### Utilities
-
-- [x] Avatar
-- [x] Random
-- [ ] Emoji
 
 ### Features
 
