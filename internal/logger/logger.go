@@ -28,12 +28,16 @@ func Init() {
 	// Set log level
 	logLevel := cfg.Get().LogLevel
 
-	var zeroLogLevel zerolog.Level
-	if err := zeroLogLevel.UnmarshalText([]byte(logLevel)); err != nil {
-		log.Fatal().Err(err).Msg("Failed to unmarshal log level")
-	}
+	if logLevel == "" {
+		log.Fatal().Msg("Set LOG_LEVEL variable")
+	} else {
+		var zeroLogLevel zerolog.Level
+		if err := zeroLogLevel.UnmarshalText([]byte(logLevel)); err != nil {
+			log.Fatal().Err(err).Msg("Failed to unmarshal log level")
+		}
 
-	zerolog.SetGlobalLevel(zeroLogLevel)
+		zerolog.SetGlobalLevel(zeroLogLevel)
+	}
 
 	log.Info().Msg("Logger successfully initialized")
 }
