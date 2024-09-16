@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/caarlos0/env/v11 v11.2.2
-	github.com/disgoorg/disgo v0.18.11
+	github.com/disgoorg/disgo v0.18.12
 	github.com/disgoorg/snowflake/v2 v2.0.3
 	github.com/gofiber/fiber/v3 v3.0.0-beta.3
 	github.com/joho/godotenv v1.5.1
