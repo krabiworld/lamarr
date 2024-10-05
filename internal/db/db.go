@@ -25,7 +25,8 @@ func InitAndGet() *gorm.DB {
 
 	db, err := gorm.Open(postgres.Open(dsn), config)
 	if err != nil {
-		log.Fatal().Err(err).Send()
+		log.Error().Err(err).Send()
+		return nil
 	}
 
 	err = db.AutoMigrate(
@@ -34,7 +35,8 @@ func InitAndGet() *gorm.DB {
 		&models.Stats{},
 	)
 	if err != nil {
-		log.Fatal().Err(err).Send()
+		log.Error().Err(err).Send()
+		return nil
 	}
 
 	return db
