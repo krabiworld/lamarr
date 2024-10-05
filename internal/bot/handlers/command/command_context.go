@@ -5,6 +5,7 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
+	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/services"
@@ -103,6 +104,10 @@ func (ctx *Context) Guild() (discord.Guild, error) {
 	return guild, nil
 }
 
+func (ctx *Context) Channel() discord.InteractionChannel {
+	return ctx.e.Channel()
+}
+
 func (ctx *Context) Channels() ([]discord.GuildChannel, error) {
 	return ctx.e.Client().Rest().GetGuildChannels(*ctx.e.GuildID())
 }
@@ -182,6 +187,10 @@ func (ctx *Context) Categories() []types.Category {
 
 func (ctx *Context) Caches() cache.Caches {
 	return ctx.e.Client().Caches()
+}
+
+func (ctx *Context) Rest() rest.Rest {
+	return ctx.e.Client().Rest()
 }
 
 func (ctx *Context) Gateway() gateway.Gateway {
