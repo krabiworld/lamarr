@@ -3,10 +3,10 @@ package handlers
 import (
 	"errors"
 	"github.com/bwmarrin/discordgo"
+	"github.com/krabiworld/lamarr/internal/db/models"
+	"github.com/krabiworld/lamarr/internal/services"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
-	"module-go/internal/db/models"
-	"module-go/internal/services"
 )
 
 type GuildEvents struct {

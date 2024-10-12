@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"github.com/gofiber/fiber/v3"
+	"github.com/krabiworld/lamarr/internal/cfg"
 	"github.com/rs/zerolog/log"
-	"module-go/internal/cfg"
 )
 
 func Start() {
@@ -21,6 +21,10 @@ func Start() {
 	listenConfig := fiber.ListenConfig{
 		DisableStartupMessage: true,
 	}
+
+	app.Get("/", func(c fiber.Ctx) error {
+		return c.SendString("Lamarr API")
+	})
 
 	app.Get("/commands", func(c fiber.Ctx) error {
 		return nil

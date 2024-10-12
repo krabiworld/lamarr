@@ -1,13 +1,13 @@
 package main
 
 import (
-	"module-go/internal/api"
-	"module-go/internal/bot"
-	"module-go/internal/cfg"
-	"module-go/internal/db"
-	"module-go/internal/logger"
-	repositoryImpl "module-go/internal/repositories/impl"
-	serviceImpl "module-go/internal/services/impl"
+	"github.com/krabiworld/lamarr/internal/api"
+	"github.com/krabiworld/lamarr/internal/bot"
+	"github.com/krabiworld/lamarr/internal/cfg"
+	"github.com/krabiworld/lamarr/internal/db"
+	"github.com/krabiworld/lamarr/internal/logger"
+	repositoryImpl "github.com/krabiworld/lamarr/internal/repositories/impl"
+	serviceImpl "github.com/krabiworld/lamarr/internal/services/impl"
 	"os"
 	"os/signal"
 	"syscall"

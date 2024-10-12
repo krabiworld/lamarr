@@ -1,8 +1,8 @@
 package impl
 
 import (
-	"module-go/internal/db/models"
-	"module-go/internal/repositories"
+	"github.com/krabiworld/lamarr/internal/db/models"
+	"github.com/krabiworld/lamarr/internal/repositories"
 )
 
 type GuildServiceImpl struct {

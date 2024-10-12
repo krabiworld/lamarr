@@ -2,7 +2,7 @@ package command
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"module-go/internal/types"
+	"github.com/krabiworld/lamarr/internal/types"
 )
 
 type Builder struct {

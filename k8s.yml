@@ -1,23 +1,23 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: module-config-map
+  name: lamarr-config-map
 data:
-  APP_NAME: "Module"
+  APP_NAME: "Lamarr"
   LOG_LEVEL: "error"
   DEBUG: "false"
   API_ADDR: "0.0.0.0:7000"
   DISCORD_OWNER_ID: ""
   DISCORD_GUILD_ID: ""
-  DB_DATABASE: "module"
-  DB_HOSTNAME: "module-db.external.svc"
+  DB_DATABASE: "lamarr"
+  DB_HOSTNAME: "lamarr-db.external.svc"
   DB_PORT: "5432"
 
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: module-secrets
+  name: lamarr-secrets
 data:
   DISCORD_TOKEN: base64
   DB_USERNAME: base64
@@ -27,21 +27,21 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: module-deployment
+  name: lamarr-deployment
   labels:
-    app: module
+    app: lamarr
 spec:
   selector:
     matchLabels:
-      app: module
+      app: lamarr
   template:
     metadata:
       labels:
-        app: module
+        app: lamarr
     spec:
       containers:
-        - name: module
-          image: localhost:5000/module
+        - name: lamarr
+          image: localhost:5000/lamarr
           imagePullPolicy: Always
           resources:
             limits:
@@ -51,15 +51,15 @@ spec:
             - containerPort: 7000
           envFrom:
             - configMapRef:
-                name: module-config-map
+                name: lamarr-config-map
             - secretRef:
-                name: module-secrets
+                name: lamarr-secrets
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: module-db
+  name: lamarr-db
 spec:
   type: ExternalName
   externalName: host.docker.internal
@@ -70,10 +70,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: module-service
+  name: lamarr-service
 spec:
   selector:
-    app: module
+    app: lamarr
   ports:
     - port: 7000
       targetPort: 7000
@@ -82,7 +82,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: module-ingress
+  name: lamarr-ingress
 spec:
   rules:
     - http:
@@ -91,6 +91,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: module-service
+                name: lamarr-service
                 port:
                   number: 80

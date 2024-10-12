@@ -2,11 +2,11 @@ package db
 
 import (
 	"fmt"
+	"github.com/krabiworld/lamarr/internal/cfg"
+	"github.com/krabiworld/lamarr/internal/db/models"
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"module-go/internal/cfg"
-	"module-go/internal/db/models"
 )
 
 func InitAndGet() *gorm.DB {

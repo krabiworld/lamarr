@@ -1,6 +1,6 @@
 package repositories
 
-import "module-go/internal/db/models"
+import "github.com/krabiworld/lamarr/internal/db/models"
 
 type GuildRepository interface {
 	FindByID(id string) (*models.Guild, error)

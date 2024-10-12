@@ -2,9 +2,9 @@ package information
 
 import (
 	"fmt"
-	"module-go/internal/bot/handlers/command"
-	"module-go/internal/types"
-	"module-go/pkg/embed"
+	"github.com/krabiworld/lamarr/internal/bot/handlers/command"
+	"github.com/krabiworld/lamarr/internal/types"
+	"github.com/krabiworld/lamarr/pkg/embed"
 	"strings"
 )
 

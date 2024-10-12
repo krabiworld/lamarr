@@ -2,14 +2,14 @@ package bot
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/krabiworld/lamarr/internal/bot/commands/information"
+	"github.com/krabiworld/lamarr/internal/bot/commands/utilities"
+	"github.com/krabiworld/lamarr/internal/bot/handlers"
+	"github.com/krabiworld/lamarr/internal/bot/handlers/command"
+	"github.com/krabiworld/lamarr/internal/cfg"
+	"github.com/krabiworld/lamarr/internal/services"
+	"github.com/krabiworld/lamarr/internal/types"
 	"github.com/rs/zerolog/log"
-	"module-go/internal/bot/commands/information"
-	"module-go/internal/bot/commands/utilities"
-	"module-go/internal/bot/handlers"
-	"module-go/internal/bot/handlers/command"
-	"module-go/internal/cfg"
-	"module-go/internal/services"
-	"module-go/internal/types"
 )
 
 func Start(guildService services.GuildService) {

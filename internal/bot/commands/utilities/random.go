@@ -1,9 +1,9 @@
 package utilities
 
 import (
+	"github.com/krabiworld/lamarr/internal/bot/handlers/command"
+	"github.com/krabiworld/lamarr/internal/types"
 	"math/rand"
-	"module-go/internal/bot/handlers/command"
-	"module-go/internal/types"
 	"strconv"
 )
 

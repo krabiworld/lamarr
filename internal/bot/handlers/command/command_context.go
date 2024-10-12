@@ -2,10 +2,10 @@ package command
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/krabiworld/lamarr/internal/services"
+	"github.com/krabiworld/lamarr/internal/types"
+	"github.com/krabiworld/lamarr/pkg/embed"
 	"github.com/rs/zerolog/log"
-	"module-go/internal/services"
-	"module-go/internal/types"
-	"module-go/pkg/embed"
 )
 
 type Context struct {

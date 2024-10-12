@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"module-go/internal/db/models"
+	"github.com/krabiworld/lamarr/internal/db/models"
 )
 
 type WarnRepository interface {

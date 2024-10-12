@@ -1,9 +1,9 @@
 package logger
 
 import (
+	"github.com/krabiworld/lamarr/internal/cfg"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"module-go/internal/cfg"
 	"os"
 	"path/filepath"
 	"strconv"

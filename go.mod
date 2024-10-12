@@ -1,4 +1,4 @@
-module module-go
+module github.com/krabiworld/lamarr
 
 go 1.23.2
 

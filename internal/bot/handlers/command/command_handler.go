@@ -2,9 +2,9 @@ package command
 
 import (
 	"github.com/bwmarrin/discordgo"
+	"github.com/krabiworld/lamarr/internal/services"
+	"github.com/krabiworld/lamarr/internal/types"
 	"github.com/rs/zerolog/log"
-	"module-go/internal/services"
-	"module-go/internal/types"
 )
 
 type Handler struct {

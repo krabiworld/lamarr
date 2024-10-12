@@ -1,6 +1,6 @@
-# Module Go
+# Lamarr
 
-Rewritten multipurpose Discord bot Module in Golang.
+Rewritten multipurpose Discord bot Lamarr in Golang.
 
 ## Roadmap
 

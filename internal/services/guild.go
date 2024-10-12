@@ -1,7 +1,7 @@
 package services
 
 import (
-	"module-go/internal/db/models"
+	"github.com/krabiworld/lamarr/internal/db/models"
 )
 
 type GuildService interface {
