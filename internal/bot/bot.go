@@ -1,13 +1,7 @@
 package bot
 
 import (
-	"context"
-	"github.com/disgoorg/disgo"
-	"github.com/disgoorg/disgo/bot"
-	"github.com/disgoorg/disgo/cache"
-	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/gateway"
-	"github.com/disgoorg/snowflake/v2"
+	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/bot/commands/information"
 	"module-go/internal/bot/commands/utilities"
@@ -16,40 +10,34 @@ import (
 	"module-go/internal/cfg"
 	"module-go/internal/services"
 	"module-go/internal/types"
-	"time"
 )
 
 func Start(guildService services.GuildService) {
-	ownerId := snowflake.MustParse(cfg.Get().DiscordOwnerID)
-	guildId := snowflake.MustParse(cfg.Get().DiscordGuildID)
+	ownerId := cfg.Get().DiscordOwnerID
+	guildId := cfg.Get().DiscordGuildID
 
 	commandHandler := command.NewHandler(InitCommands(), InitCategories(), guildService, ownerId)
 	guildEvents := handlers.NewGuildEvents(guildService)
 
-	client, err := disgo.New(
-		cfg.Get().DiscordToken,
-		bot.WithGatewayConfigOpts(gateway.WithIntents(gateway.IntentsAll)),
-		bot.WithCacheConfigOpts(cache.WithCaches(
-			cache.FlagGuilds,
-			cache.FlagMembers,
-			cache.FlagPresences,
-			cache.FlagChannels,
-		)),
-		bot.WithEventListenerFunc(commandHandler.OnInteractionCreate),
-		bot.WithEventListenerFunc(guildEvents.OnGuildCreate),
-	)
+	session, err := discordgo.New("Bot " + cfg.Get().DiscordToken)
 	if err != nil {
-		log.Fatal().Err(err).Send()
+		log.Error().Err(err).Send()
+		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsAll)
+	session.StateEnabled = true
+	session.State.MaxMessageCount = 1000
 
-	if err = client.OpenGateway(ctx); err != nil {
-		log.Fatal().Err(err).Send()
+	session.AddHandler(commandHandler.OnInteractionCreate)
+	session.AddHandler(guildEvents.OnGuildCreate)
+
+	if err = session.Open(); err != nil {
+		log.Error().Err(err).Send()
+		return
 	}
 
-	RegisterCommands(client, commandHandler, guildId)
+	RegisterCommands(session, commandHandler, guildId)
 
 	log.Info().Msg("Bot started")
 
@@ -74,16 +62,16 @@ func InitCategories() []types.Category {
 	}
 }
 
-func RegisterCommands(client bot.Client, handler *command.Handler, guildId snowflake.ID) {
+func RegisterCommands(session *discordgo.Session, handler *command.Handler, guildId string) {
 	log.Info().Int("count", len(handler.CommandsList)).Msg("Registering commands...")
 
-	commands := make([]discord.ApplicationCommandCreate, len(handler.CommandsList))
+	commands := make([]*discordgo.ApplicationCommand, len(handler.CommandsList))
 
 	for i, cmd := range handler.CommandsList {
 		commands[i] = cmd.ApplicationCommand
 	}
 
-	_, err := client.Rest().SetGuildCommands(client.ApplicationID(), guildId, commands)
+	_, err := session.ApplicationCommandBulkOverwrite(session.State.User.ID, guildId, commands)
 	if err != nil {
 		log.Error().Err(err).Send()
 	}

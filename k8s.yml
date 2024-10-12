@@ -10,7 +10,7 @@ data:
   DISCORD_OWNER_ID: ""
   DISCORD_GUILD_ID: ""
   DB_DATABASE: "module"
-  DB_HOSTNAME: "127.0.0.1"
+  DB_HOSTNAME: "module-db.external.svc"
   DB_PORT: "5432"
 
 ---
@@ -21,7 +21,7 @@ metadata:
 data:
   DISCORD_TOKEN: base64
   DB_USERNAME: base64
-  DB_PASSWORD: ""
+  DB_PASSWORD: base64
 
 ---
 apiVersion: apps/v1
@@ -42,7 +42,7 @@ spec:
       containers:
         - name: module
           image: localhost:5000/module
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           resources:
             limits:
               memory: "128Mi"
@@ -54,6 +54,17 @@ spec:
                 name: module-config-map
             - secretRef:
                 name: module-secrets
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: module-db
+spec:
+  type: ExternalName
+  externalName: host.docker.internal
+  ports:
+    - port: 5432
 
 ---
 apiVersion: v1

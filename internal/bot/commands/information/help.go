@@ -2,9 +2,9 @@ package information
 
 import (
 	"fmt"
-	"github.com/disgoorg/disgo/discord"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 	"strings"
 )
 
@@ -25,8 +25,7 @@ func (c HelpCommand) Handle(ctx *command.Context) error {
 	commands := ctx.Commands()
 	categories := ctx.Categories()
 
-	embed := discord.NewEmbedBuilder().
-		SetColor(types.ColorDefault)
+	e := embed.New().Color(types.ColorDefault)
 
 	if ok {
 		for _, category := range categories {
@@ -40,26 +39,26 @@ func (c HelpCommand) Handle(ctx *command.Context) error {
 						continue
 					}
 
-					embed.AddField(cmd.ApplicationCommand.Name, cmd.ApplicationCommand.Description, false)
+					e.Field(cmd.ApplicationCommand.Name, cmd.ApplicationCommand.Description, false)
 				}
 
-				embed.SetTitle(fmt.Sprintf("Commands of category %s", category.String()))
-				return ctx.ReplyEmbed(embed.Build())
+				e.Title(fmt.Sprintf("Commands of category %s", category.String()))
+				return ctx.ReplyEmbed(e.Build())
 			}
 		}
 
 		for _, cmd := range commands {
 			if !cmd.Hidden && strings.Contains(strings.ToLower(cmd.ApplicationCommand.Name), strings.ToLower(query)) {
-				embed.AddField(cmd.ApplicationCommand.Name, cmd.ApplicationCommand.Description, false)
-				embed.SetTitle(fmt.Sprintf("Information of command %s", cmd.ApplicationCommand.Name))
-				return ctx.ReplyEmbed(embed.Build())
+				e.Field(cmd.ApplicationCommand.Name, cmd.ApplicationCommand.Description, false)
+				e.Title(fmt.Sprintf("Information of command %s", cmd.ApplicationCommand.Name))
+				return ctx.ReplyEmbed(e.Build())
 			}
 		}
 
 		return ctx.ReplyError(fmt.Sprintf("Command or category **%s** not found.", query))
 	} else {
-		embed.SetTitle("Available commands").
-			SetDescription("For additional information enter `help category` to get information about category or `help command` to get information about command.")
+		e.Title("Available commands").
+			Description("For additional information enter `help category` to get information about category or `help command` to get information about command.")
 
 		for _, category := range categories {
 			if category == types.CategoryUnspecified {
@@ -76,9 +75,9 @@ func (c HelpCommand) Handle(ctx *command.Context) error {
 				builder.WriteString(fmt.Sprintf("`%s` ", cmd.ApplicationCommand.Name))
 			}
 
-			embed.AddField(fmt.Sprintf("%[1]s (help %[1]s)", category.String()), builder.String(), false)
+			e.Field(fmt.Sprintf("%[1]s (help %[1]s)", category.String()), builder.String(), false)
 		}
 
-		return ctx.ReplyEmbed(embed.Build())
+		return ctx.ReplyEmbed(e.Build())
 	}
 }

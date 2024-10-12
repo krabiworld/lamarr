@@ -1,75 +1,83 @@
 package command
 
 import (
-	"github.com/disgoorg/disgo/cache"
-	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
-	"github.com/disgoorg/disgo/gateway"
-	"github.com/disgoorg/disgo/rest"
-	"github.com/disgoorg/snowflake/v2"
+	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/services"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 )
 
 type Context struct {
-	e          *events.ApplicationCommandInteractionCreate
-	commands   []Command
-	categories []types.Category
-	service    services.GuildService
-	owner      snowflake.ID
+	session     *discordgo.Session
+	interaction *discordgo.InteractionCreate
+	commands    []Command
+	categories  []types.Category
+	service     services.GuildService
+	owner       string
 }
 
 func (ctx *Context) Reply(message string, ephemeral ...bool) error {
-	return ctx.e.CreateMessage(discord.NewMessageCreateBuilder().
-		SetContent(message).
-		SetEphemeral(len(ephemeral) > 0 && ephemeral[0]).
-		Build())
+	data := &discordgo.InteractionResponseData{
+		Content: message,
+	}
+
+	if len(ephemeral) > 0 && ephemeral[0] {
+		data.Flags = discordgo.MessageFlagsEphemeral
+	}
+
+	return ctx.session.InteractionRespond(ctx.interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: data,
+	})
 }
 
-func (ctx *Context) ReplyEmbed(embed discord.Embed, ephemeral ...bool) error {
-	return ctx.e.CreateMessage(discord.NewMessageCreateBuilder().
-		SetEmbeds(embed).
-		SetEphemeral(len(ephemeral) > 0 && ephemeral[0]).
-		Build())
+func (ctx *Context) ReplyEmbed(embed *discordgo.MessageEmbed, ephemeral ...bool) error {
+	data := &discordgo.InteractionResponseData{
+		Embeds: []*discordgo.MessageEmbed{embed},
+	}
+
+	if len(ephemeral) > 0 && ephemeral[0] {
+		data.Flags = discordgo.MessageFlagsEphemeral
+	}
+
+	return ctx.session.InteractionRespond(ctx.interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: data,
+	})
 }
 
 func (ctx *Context) ReplyError(message string) error {
-	embed := discord.NewEmbedBuilder().SetDescription(message).SetColor(types.ColorError).Build()
-	return ctx.ReplyEmbed(embed, true)
+	return ctx.ReplyEmbed(embed.New().Description(message).Color(types.ColorError).Build(), true)
 }
 
-func (ctx *Context) Data() discord.SlashCommandInteractionData {
-	return ctx.e.SlashCommandInteractionData()
-}
-
-func (ctx *Context) Option(key string) (discord.SlashCommandOption, bool) {
-	opts := ctx.e.SlashCommandInteractionData().Options
+func (ctx *Context) Option(key string) *discordgo.ApplicationCommandInteractionDataOption {
+	opts := ctx.interaction.ApplicationCommandData().Options
 	for _, opt := range opts {
 		if opt.Name == key {
-			return opt, true
+			return opt
 		}
 	}
-	return discord.SlashCommandOption{}, false
+	return nil
 }
 
-func (ctx *Context) OptionAsUser(key string, defaultUser ...discord.User) (discord.User, bool) {
-	user, ok := ctx.Data().OptUser(key)
-	if ok {
-		return user, true
+func (ctx *Context) OptionAsUser(key string, defaultUser ...*discordgo.User) (*discordgo.User, bool) {
+	opt := ctx.Option(key)
+	if opt != nil {
+		return opt.UserValue(ctx.session), true
 	}
 
 	if len(defaultUser) > 0 {
 		return defaultUser[0], true
 	}
 
-	return discord.User{}, false
+	return nil, false
 }
 
 func (ctx *Context) OptionAsInt(key string, defaultNumber ...int64) (int64, bool) {
-	integer, ok := ctx.Data().OptInt(key)
-	if ok {
-		return int64(integer), true
+	opt := ctx.Option(key)
+	if opt != nil {
+		return opt.IntValue(), true
 	}
 
 	if len(defaultNumber) > 0 {
@@ -80,9 +88,9 @@ func (ctx *Context) OptionAsInt(key string, defaultNumber ...int64) (int64, bool
 }
 
 func (ctx *Context) OptionAsString(key string, defaultString ...string) (string, bool) {
-	str, ok := ctx.Data().OptString(key)
-	if ok {
-		return str, true
+	opt := ctx.Option(key)
+	if opt != nil {
+		return opt.StringValue(), true
 	}
 
 	if len(defaultString) > 0 {
@@ -92,61 +100,78 @@ func (ctx *Context) OptionAsString(key string, defaultString ...string) (string,
 	return "", false
 }
 
-func (ctx *Context) Guild() (discord.Guild, error) {
-	guild, ok := ctx.e.Guild()
-	if !ok {
-		restGuild, err := ctx.e.Client().Rest().GetGuild(*ctx.e.GuildID(), false)
-		if err != nil {
-			return discord.Guild{}, err
-		}
-		guild = restGuild.Guild
+func (ctx *Context) Guild() (*discordgo.Guild, error) {
+	guild, err := ctx.session.State.Guild(ctx.interaction.GuildID)
+	if err != nil {
+		guild, err = ctx.session.Guild(ctx.interaction.GuildID)
 	}
-	return guild, nil
+	return guild, err
 }
 
-func (ctx *Context) Channel() discord.InteractionChannel {
-	return ctx.e.Channel()
-}
-
-func (ctx *Context) Channels() ([]discord.GuildChannel, error) {
-	return ctx.e.Client().Rest().GetGuildChannels(*ctx.e.GuildID())
-}
-
-func (ctx *Context) Presence(id snowflake.ID) (discord.Presence, bool) {
-	return ctx.e.Client().Caches().Presence(*ctx.e.GuildID(), id)
-}
-
-func (ctx *Context) Presences() []discord.Presence {
-	presences := make([]discord.Presence, 0)
-	ctx.e.Client().Caches().PresenceForEach(*ctx.e.GuildID(), func(presence discord.Presence) {
-		presences = append(presences, presence)
-	})
-	return presences
-}
-
-func (ctx *Context) Members() ([]discord.Member, error) {
-	return ctx.e.Client().MemberChunkingManager().RequestAllMembers(*ctx.e.GuildID())
-}
-
-func (ctx *Context) Member() discord.ResolvedMember {
-	return *ctx.e.Member()
-}
-
-func (ctx *Context) MemberByID(id snowflake.ID) (discord.Member, error) {
-	member, ok := ctx.e.Client().Caches().Member(*ctx.e.GuildID(), id)
-	if !ok {
-		restMember, err := ctx.e.Client().Rest().GetMember(*ctx.e.GuildID(), id)
-		if err != nil {
-			return discord.Member{}, err
-		}
-
-		member = *restMember
+func (ctx *Context) Channel() (*discordgo.Channel, error) {
+	channel, err := ctx.session.State.Channel(ctx.interaction.ChannelID)
+	if err != nil {
+		channel, err = ctx.session.Channel(ctx.interaction.ChannelID)
 	}
-	return member, nil
+	return channel, err
 }
 
-func (ctx *Context) User() discord.User {
-	return ctx.e.User()
+func (ctx *Context) Channels() ([]*discordgo.Channel, error) {
+	guild, err := ctx.Guild()
+	if err != nil {
+		return nil, err
+	}
+
+	return guild.Channels, nil
+}
+
+func (ctx *Context) Presence(id string) (*discordgo.Presence, bool) {
+	guild, err := ctx.Guild()
+	if err != nil {
+		return nil, false
+	}
+
+	for _, presence := range guild.Presences {
+		if presence.User.ID == id {
+			return presence, true
+		}
+	}
+
+	return nil, false
+}
+
+func (ctx *Context) Presences() ([]*discordgo.Presence, error) {
+	guild, err := ctx.Guild()
+	if err != nil {
+		return nil, err
+	}
+
+	return guild.Presences, nil
+}
+
+func (ctx *Context) Members() ([]*discordgo.Member, error) {
+	guild, err := ctx.Guild()
+	if err != nil {
+		return nil, err
+	}
+
+	return guild.Members, nil
+}
+
+func (ctx *Context) Member() *discordgo.Member {
+	return ctx.interaction.Member
+}
+
+func (ctx *Context) MemberByID(id string) (*discordgo.Member, error) {
+	member, err := ctx.session.State.Member(ctx.interaction.GuildID, id)
+	if err != nil {
+		member, err = ctx.session.GuildMember(ctx.interaction.GuildID, id)
+	}
+	return member, err
+}
+
+func (ctx *Context) User() *discordgo.User {
+	return ctx.Member().User
 }
 
 func (ctx *Context) Owner() bool {
@@ -156,25 +181,33 @@ func (ctx *Context) Owner() bool {
 func (ctx *Context) Moderator() bool {
 	member := ctx.Member()
 
-	if member.Permissions.Has(discord.PermissionAdministrator) || ctx.Owner() {
+	if ctx.HasPermission(member.Permissions, discordgo.PermissionAdministrator) || ctx.Owner() {
 		return true
 	}
 
-	modRole, err := ctx.service.GetModRole(*ctx.e.GuildID())
+	modRole, err := ctx.service.GetModRole(ctx.interaction.GuildID)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return false
 	}
 
 	if modRole != nil {
-		for _, role := range member.RoleIDs {
-			if role.String() == *modRole {
+		for _, role := range member.Roles {
+			if role == *modRole {
 				return true
 			}
 		}
 	}
 
 	return false
+}
+
+func (ctx *Context) SelfUser() *discordgo.User {
+	return ctx.session.State.User
+}
+
+func (ctx *Context) Ping() string {
+	return ctx.session.HeartbeatLatency().String()
 }
 
 func (ctx *Context) Commands() []Command {
@@ -185,14 +218,6 @@ func (ctx *Context) Categories() []types.Category {
 	return ctx.categories
 }
 
-func (ctx *Context) Caches() cache.Caches {
-	return ctx.e.Client().Caches()
-}
-
-func (ctx *Context) Rest() rest.Rest {
-	return ctx.e.Client().Rest()
-}
-
-func (ctx *Context) Gateway() gateway.Gateway {
-	return ctx.e.Client().Gateway()
+func (ctx *Context) HasPermission(dst int64, src int) bool {
+	return dst&int64(src) != 0
 }

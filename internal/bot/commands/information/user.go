@@ -3,10 +3,10 @@ package information
 import (
 	"errors"
 	"fmt"
-	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/snowflake/v2"
+	"github.com/bwmarrin/discordgo"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 	"strings"
 )
 
@@ -43,40 +43,36 @@ func (cmd UserCommand) Handle(ctx *command.Context) error {
 		cmd.CreatedAt(user),
 	)
 
-	e := discord.NewEmbedBuilder().
-		SetAuthor(user.Username, "", "").
-		SetDescription(description).
-		SetFooter("ID: "+user.ID.String(), "")
+	e := embed.New().
+		Author(user.Username, "").
+		Color(user.AccentColor).
+		Description(description).
+		Footer("ID: " + user.ID)
 
-	if user.AccentColor != nil {
-		e.SetColor(*user.AccentColor)
+	if user.Avatar != "" {
+		e.Author(user.Username, user.AvatarURL("512")).Thumbnail(user.AvatarURL("512"))
 	}
 
-	if user.Avatar != nil {
-		e.SetAuthor(user.Username, "", *user.AvatarURL())
-		e.SetThumbnail(*user.AvatarURL())
+	if len(member.Roles) > 0 {
+		e.Field("Roles", cmd.Roles(member.Roles), false)
 	}
 
-	if len(member.RoleIDs) > 0 {
-		e.AddField("Roles", cmd.Roles(member.RoleIDs), false)
-	}
-
-	if user.Banner != nil {
-		e.SetImage(*user.BannerURL())
+	if user.Banner != "" {
+		e.Image(user.BannerURL("1024"))
 	}
 
 	return ctx.ReplyEmbed(e.Build())
 }
 
-func (cmd UserCommand) Status(userStatus discord.OnlineStatus) string {
+func (cmd UserCommand) Status(userStatus discordgo.Status) string {
 	var status string
 
 	switch userStatus {
-	case discord.OnlineStatusOnline:
+	case discordgo.StatusOnline:
 		status = types.EmojiOnline + "Online"
-	case discord.OnlineStatusIdle:
+	case discordgo.StatusIdle:
 		status = types.EmojiIdle + "Idle"
-	case discord.OnlineStatusOffline:
+	case discordgo.StatusOffline:
 		status = types.EmojiOffline + "Do Not Disturb"
 	default:
 		status = types.EmojiOffline + "Offline"
@@ -85,22 +81,22 @@ func (cmd UserCommand) Status(userStatus discord.OnlineStatus) string {
 	return fmt.Sprintf("**Status:** %s", status)
 }
 
-func (cmd UserCommand) Activities(userActivities []discord.Activity) string {
+func (cmd UserCommand) Activities(userActivities []*discordgo.Activity) string {
 	var builder strings.Builder
 
 	for _, activity := range userActivities {
 		switch activity.Type {
-		case discord.ActivityTypeGame:
+		case discordgo.ActivityTypeGame:
 			builder.WriteString("**Playing:** ")
-		case discord.ActivityTypeStreaming:
+		case discordgo.ActivityTypeStreaming:
 			builder.WriteString("**Streaming:** ")
-		case discord.ActivityTypeListening:
+		case discordgo.ActivityTypeListening:
 			builder.WriteString("**Listening to:** ")
-		case discord.ActivityTypeWatching:
+		case discordgo.ActivityTypeWatching:
 			builder.WriteString("**Watching:** ")
-		case discord.ActivityTypeCustom:
+		case discordgo.ActivityTypeCustom:
 			builder.WriteString("**Custom:** ")
-		case discord.ActivityTypeCompeting:
+		case discordgo.ActivityTypeCompeting:
 			builder.WriteString("**Competing to:** ")
 		}
 		builder.WriteString(activity.Name)
@@ -110,18 +106,23 @@ func (cmd UserCommand) Activities(userActivities []discord.Activity) string {
 	return strings.TrimSuffix(builder.String(), "\n")
 }
 
-func (cmd UserCommand) JoinedAt(member discord.Member) string {
+func (cmd UserCommand) JoinedAt(member *discordgo.Member) string {
 	return fmt.Sprintf("**Joined At:** <t:%[1]d:D> (<t:%[1]d:R>)", member.JoinedAt.Unix())
 }
 
-func (cmd UserCommand) CreatedAt(user discord.User) string {
-	return fmt.Sprintf("**Created At:** <t:%[1]d:D> (<t:%[1]d:R>)", user.CreatedAt().Unix())
+func (cmd UserCommand) CreatedAt(user *discordgo.User) string {
+	createdAt, err := discordgo.SnowflakeTimestamp(user.ID)
+	if err != nil {
+		return "invalid id"
+	}
+
+	return fmt.Sprintf("**Created At:** <t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix())
 }
 
-func (cmd UserCommand) Roles(roles []snowflake.ID) string {
+func (cmd UserCommand) Roles(roles []string) string {
 	var builder strings.Builder
 	for _, role := range roles {
-		builder.WriteString(fmt.Sprintf("<@&%s> ", role.String()))
+		builder.WriteString(fmt.Sprintf("<@&%s> ", role))
 	}
 	return strings.TrimSuffix(builder.String(), " ")
 }

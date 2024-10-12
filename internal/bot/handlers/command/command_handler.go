@@ -1,8 +1,7 @@
 package command
 
 import (
-	"github.com/disgoorg/disgo/events"
-	"github.com/disgoorg/snowflake/v2"
+	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
 	"module-go/internal/services"
 	"module-go/internal/types"
@@ -13,10 +12,10 @@ type Handler struct {
 	CommandsList []Command
 	Categories   []types.Category
 	guildService services.GuildService
-	ownerId      snowflake.ID
+	ownerId      string
 }
 
-func NewHandler(commands []Command, categories []types.Category, guildService services.GuildService, ownerId snowflake.ID) *Handler {
+func NewHandler(commands []Command, categories []types.Category, guildService services.GuildService, ownerId string) *Handler {
 	m := make(map[string]Command, len(commands))
 	l := make([]Command, len(commands))
 	for i, command := range commands {
@@ -33,18 +32,19 @@ func NewHandler(commands []Command, categories []types.Category, guildService se
 	}
 }
 
-func (h *Handler) OnInteractionCreate(event *events.ApplicationCommandInteractionCreate) {
-	command, ok := h.CommandsMap[event.Data.CommandName()]
+func (h *Handler) OnInteractionCreate(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+	command, ok := h.CommandsMap[interaction.ApplicationCommandData().Name]
 	if !ok {
 		return
 	}
 
 	ctx := &Context{
-		e:          event,
-		commands:   h.CommandsList,
-		categories: h.Categories,
-		service:    h.guildService,
-		owner:      h.ownerId,
+		session:     session,
+		interaction: interaction,
+		commands:    h.CommandsList,
+		categories:  h.Categories,
+		service:     h.guildService,
+		owner:       h.ownerId,
 	}
 
 	if command.OwnerCommand && !ctx.Owner() {

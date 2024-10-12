@@ -2,9 +2,10 @@ package information
 
 import (
 	"fmt"
-	"github.com/disgoorg/disgo/discord"
+	"github.com/bwmarrin/discordgo"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 	"strings"
 	"time"
 )
@@ -36,38 +37,44 @@ func (cmd ServerCommand) Handle(ctx *command.Context) error {
 		return err
 	}
 
-	presences := ctx.Presences()
+	presences, err := ctx.Presences()
+	if err != nil {
+		return err
+	}
 
 	owner, err := ctx.MemberByID(guild.OwnerID)
 	if err != nil {
 		return err
 	}
 
-	createdAt := guild.ID.Time()
-
-	e := discord.NewEmbedBuilder().
-		SetTitle(fmt.Sprintf("Information about %s", guild.Name)).
-		SetColor(types.ColorDefault).
-		SetFooter(fmt.Sprintf("ID: %s", guild.ID), "").
-		AddField(cmd.MembersField(members)).
-		AddField(cmd.ChannelsField(channels)).
-		AddField(cmd.StatusField(presences)).
-		AddField(cmd.OwnerField(owner)).
-		AddField(cmd.VerificationLevelField(guild)).
-		AddField(cmd.CreatedAtField(createdAt))
-
-	if guild.Icon != nil {
-		e.SetThumbnail(*guild.IconURL())
+	createdAt, err := discordgo.SnowflakeTimestamp(guild.ID)
+	if err != nil {
+		return err
 	}
 
-	if guild.Banner != nil {
-		e.SetImage(*guild.BannerURL())
+	e := embed.New().
+		Title(fmt.Sprintf("Information about %s", guild.Name)).
+		Color(types.ColorDefault).
+		Footer(fmt.Sprintf("ID: %s", guild.ID)).
+		Field(cmd.MembersField(members)).
+		Field(cmd.ChannelsField(channels)).
+		Field(cmd.StatusField(presences)).
+		Field(cmd.OwnerField(owner)).
+		Field(cmd.VerificationLevelField(guild)).
+		Field(cmd.CreatedAtField(createdAt))
+
+	if guild.Icon != "" {
+		e.Thumbnail(guild.IconURL("512"))
+	}
+
+	if guild.Banner != "" {
+		e.Image(guild.BannerURL("1024"))
 	}
 
 	return ctx.ReplyEmbed(e.Build())
 }
 
-func (cmd ServerCommand) MembersField(members []discord.Member) (string, string, bool) {
+func (cmd ServerCommand) MembersField(members []*discordgo.Member) (string, string, bool) {
 	botCount, memberCount := 0, 0
 
 	for _, member := range members {
@@ -83,16 +90,16 @@ func (cmd ServerCommand) MembersField(members []discord.Member) (string, string,
 	return name, value, true
 }
 
-func (cmd ServerCommand) ChannelsField(channels []discord.GuildChannel) (string, string, bool) {
+func (cmd ServerCommand) ChannelsField(channels []*discordgo.Channel) (string, string, bool) {
 	total, textChannels, voiceChannels, stageChannels := 0, 0, 0, 0
 
 	for _, channel := range channels {
-		switch channel.Type() {
-		case discord.ChannelTypeGuildText:
+		switch channel.Type {
+		case discordgo.ChannelTypeGuildText:
 			textChannels++
-		case discord.ChannelTypeGuildVoice:
+		case discordgo.ChannelTypeGuildVoice:
 			voiceChannels++
-		case discord.ChannelTypeGuildStageVoice:
+		case discordgo.ChannelTypeGuildStageVoice:
 			stageChannels++
 		default:
 			continue
@@ -120,16 +127,16 @@ func (cmd ServerCommand) ChannelsField(channels []discord.GuildChannel) (string,
 	return name, value, true
 }
 
-func (cmd ServerCommand) StatusField(presences []discord.Presence) (string, string, bool) {
+func (cmd ServerCommand) StatusField(presences []*discordgo.Presence) (string, string, bool) {
 	online, idle, dnd, offline := 0, 0, 0, 0
 
 	for _, presence := range presences {
 		switch presence.Status {
-		case discord.OnlineStatusOnline:
+		case discordgo.StatusOnline:
 			online++
-		case discord.OnlineStatusIdle:
+		case discordgo.StatusIdle:
 			idle++
-		case discord.OnlineStatusDND:
+		case discordgo.StatusDoNotDisturb:
 			dnd++
 		default:
 			offline++
@@ -159,23 +166,23 @@ func (cmd ServerCommand) StatusField(presences []discord.Presence) (string, stri
 	return name, value, true
 }
 
-func (cmd ServerCommand) OwnerField(owner discord.Member) (string, string, bool) {
+func (cmd ServerCommand) OwnerField(owner *discordgo.Member) (string, string, bool) {
 	return "Owner", owner.Mention(), true
 }
 
-func (cmd ServerCommand) VerificationLevelField(guild discord.Guild) (string, string, bool) {
+func (cmd ServerCommand) VerificationLevelField(guild *discordgo.Guild) (string, string, bool) {
 	var verificationLevel string
 
 	switch guild.VerificationLevel {
-	case discord.VerificationLevelNone:
+	case discordgo.VerificationLevelNone:
 		verificationLevel = "None"
-	case discord.VerificationLevelLow:
+	case discordgo.VerificationLevelLow:
 		verificationLevel = "Low"
-	case discord.VerificationLevelMedium:
+	case discordgo.VerificationLevelMedium:
 		verificationLevel = "Medium"
-	case discord.VerificationLevelHigh:
+	case discordgo.VerificationLevelHigh:
 		verificationLevel = "High"
-	case discord.VerificationLevelVeryHigh:
+	case discordgo.VerificationLevelVeryHigh:
 		verificationLevel = "Very High"
 	}
 

@@ -2,9 +2,9 @@ package utilities
 
 import (
 	"fmt"
-	"github.com/disgoorg/disgo/discord"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 )
 
 type AvatarCommand struct{}
@@ -22,16 +22,11 @@ func NewAvatarCommand() command.Command {
 func (cmd AvatarCommand) Handle(ctx *command.Context) error {
 	user, _ := ctx.OptionAsUser("user", ctx.User())
 
-	e := discord.NewEmbedBuilder().
-		SetAuthor(fmt.Sprintf("Avatar of %s", user.Username), "", "")
+	e := embed.New().
+		Author(fmt.Sprintf("Avatar of %s", user.Username), "").
+		Color(user.AccentColor).
+		Image(user.AvatarURL("1024")).
+		Build()
 
-	if user.AccentColor != nil {
-		e.SetColor(*user.AccentColor)
-	}
-
-	if user.Avatar != nil {
-		e.SetImage(*user.AvatarURL())
-	}
-
-	return ctx.ReplyEmbed(e.Build())
+	return ctx.ReplyEmbed(e)
 }

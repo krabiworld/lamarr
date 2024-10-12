@@ -2,9 +2,9 @@ package information
 
 import (
 	"fmt"
-	"github.com/disgoorg/disgo/discord"
 	"module-go/internal/bot/handlers/command"
 	"module-go/internal/types"
+	"module-go/pkg/embed"
 )
 
 type StatsCommand struct{}
@@ -19,24 +19,21 @@ func NewStatsCommand() command.Command {
 }
 
 func (cmd StatsCommand) Handle(ctx *command.Context) error {
-	servers := ctx.Caches().GuildsLen()
-	members := ctx.Caches().MembersAllLen()
-	channels := ctx.Caches().ChannelsLen()
-	selfUser, _ := ctx.Caches().SelfUser()
-	ping := ctx.Gateway().Latency().String()
+	//servers := ctx.Caches().GuildsLen()
+	//members := ctx.Caches().MembersAllLen()
+	//channels := ctx.Caches().ChannelsLen()
+	selfUser := ctx.SelfUser()
 
-	main := fmt.Sprintf("**Servers:** %d\n**Users:** %d\n**Channels:** %d", servers, members, channels)
-	platform := fmt.Sprintf("**Ping:** %s", ping)
+	//main := fmt.Sprintf("**Servers:** %d\n**Users:** %d\n**Channels:** %d", servers, members, channels)
+	platform := fmt.Sprintf("**Ping:** %s", ctx.Ping())
 
-	embed := discord.NewEmbedBuilder().
-		SetTitle("Bot statistics").
-		SetColor(types.ColorDefault).
-		AddField("Main", main, true).
-		AddField("Platform", platform, true)
+	e := embed.New().
+		Title("Bot statistics").
+		Color(types.ColorDefault).
+		Thumbnail(selfUser.AvatarURL("512")).
+		Field("Main", "main", true).
+		Field("Platform", platform, true).
+		Build()
 
-	if selfUser.Avatar != nil {
-		embed.SetThumbnail(*selfUser.AvatarURL())
-	}
-
-	return ctx.ReplyEmbed(embed.Build())
+	return ctx.ReplyEmbed(e)
 }
