@@ -6,6 +6,7 @@ import (
 	"github.com/krabiworld/lamarr/internal/types"
 	"github.com/krabiworld/lamarr/pkg/embed"
 	"github.com/rs/zerolog/log"
+	"time"
 )
 
 type Context struct {
@@ -206,8 +207,12 @@ func (ctx *Context) SelfUser() *discordgo.User {
 	return ctx.session.State.User
 }
 
+func (ctx *Context) State() *discordgo.State {
+	return ctx.session.State
+}
+
 func (ctx *Context) Ping() string {
-	return ctx.session.HeartbeatLatency().String()
+	return ctx.session.HeartbeatLatency().Round(time.Millisecond).String()
 }
 
 func (ctx *Context) Commands() []Command {

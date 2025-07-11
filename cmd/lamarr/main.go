@@ -8,12 +8,14 @@ import (
 	"github.com/krabiworld/lamarr/internal/logger"
 	repositoryImpl "github.com/krabiworld/lamarr/internal/repositories/impl"
 	serviceImpl "github.com/krabiworld/lamarr/internal/services/impl"
+	"github.com/krabiworld/lamarr/internal/uptime"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
+	uptime.Init()
 	cfg.Init()
 	logger.Init()
 	conn := db.InitAndGet()
