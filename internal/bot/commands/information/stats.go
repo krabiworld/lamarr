@@ -29,7 +29,6 @@ func (cmd StatsCommand) Handle(ctx *command.Context) error {
 
 	e := embed.New().
 		Title("Bot statistics").
-		Color(types.ColorDefault).
 		Thumbnail(selfUser.AvatarURL("512")).
 		Field("Main", "main", true).
 		Field("Platform", platform, true).

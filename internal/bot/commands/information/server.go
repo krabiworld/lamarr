@@ -54,7 +54,6 @@ func (cmd ServerCommand) Handle(ctx *command.Context) error {
 
 	e := embed.New().
 		Title(fmt.Sprintf("Information about %s", guild.Name)).
-		Color(types.ColorDefault).
 		Footer(fmt.Sprintf("ID: %s", guild.ID)).
 		Field(cmd.MembersField(members)).
 		Field(cmd.ChannelsField(channels)).

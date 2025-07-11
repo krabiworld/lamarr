@@ -1,13 +1,16 @@
 package embed
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+	"github.com/krabiworld/lamarr/internal/types"
+)
 
 type Builder struct {
 	embed *discordgo.MessageEmbed
 }
 
 func New() *Builder {
-	return &Builder{embed: &discordgo.MessageEmbed{}}
+	return &Builder{embed: &discordgo.MessageEmbed{Color: types.ColorDefault}}
 }
 
 func (b *Builder) Title(title string) *Builder {

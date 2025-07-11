@@ -25,6 +25,6 @@ func main() {
 	go bot.Start(guildService)
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	<-c
 }
