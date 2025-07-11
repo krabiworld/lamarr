@@ -16,7 +16,7 @@ func MustNew() *gorm.DB {
 		log.Panic().Err(err).Msg("Failed to open dialector")
 	}
 
-	db, err := gorm.Open(dial, &gorm.Config{})
+	db, err := gorm.Open(dial, &gorm.Config{Logger: Logger{}})
 	if err != nil {
 		log.Panic().Err(err).Send()
 		return nil

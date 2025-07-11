@@ -17,7 +17,7 @@ func NewGuildEvents(s services.GuildService) *GuildEvents {
 	return &GuildEvents{s: s}
 }
 
-func (g *GuildEvents) OnGuildCreate(_ *discordgo.Session, e discordgo.GuildCreate) {
+func (g *GuildEvents) OnGuildCreate(_ *discordgo.Session, e *discordgo.GuildCreate) {
 	_, err := g.s.Get(e.ID)
 	if err == nil {
 		return
