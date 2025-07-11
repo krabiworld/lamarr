@@ -1,9 +1,13 @@
-FROM golang:alpine AS build
+FROM golang:alpine AS builder
 WORKDIR /app
-COPY . .
+COPY go.mod go.sum ./
 RUN go mod download
-RUN CGO_ENABLED=0 go build -C cmd/lamarr -o /app/lamarr
+
+COPY . .
+ENV CGO_ENABLED=0
+ENV GOCACHE=/root/.cache/go-build
+RUN --mount=type=cache,target="/root/.cache/go-build" go build -C cmd/lamarr -o /app/lamarr
 
 FROM gcr.io/distroless/static-debian12
-COPY --from=build /app/lamarr .
+COPY --from=builder /app/lamarr .
 CMD ["/lamarr"]

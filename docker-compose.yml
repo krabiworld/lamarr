@@ -1,12 +1,7 @@
-name: lamarr
 services:
   app:
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-    restart: unless-stopped
     build: .
+    restart: unless-stopped
     env_file: .env
     ports:
       - "8080:8080"
@@ -18,8 +13,8 @@ services:
     restart: unless-stopped
     shm_size: 128mb
     environment:
-      POSTGRES_PASSWORD: "password"
       POSTGRES_USER: "lamarr"
+      POSTGRES_PASSWORD: "password"
     volumes:
       - lamarr-db:/var/lib/postgresql/data
 

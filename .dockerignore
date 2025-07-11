@@ -1,6 +1,11 @@
-.git*
-.idea
-.github
+.git/
+.idea/
+.vscode/
+.github/
+tmp/
 .env*
 LICENSE
 README.md
+Dockerfile
+docker-compose.yml
+.DS_Store
