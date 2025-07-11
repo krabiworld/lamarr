@@ -35,7 +35,7 @@ func (cmd UserCommand) Handle(ctx *command.Context) error {
 	}
 
 	description := fmt.Sprintf(
-		"**Username:** %s\n%s\n%s\n%s\n%s",
+		"**Username:** %s\n%s%s%s%s",
 		user.Mention(),
 		cmd.Status(userPresence.Status),
 		cmd.Activities(userPresence.Activities),
@@ -44,13 +44,13 @@ func (cmd UserCommand) Handle(ctx *command.Context) error {
 	)
 
 	e := embed.New().
-		Author(user.Username, "").
+		Author("Information about "+user.Username, "").
 		Color(user.AccentColor).
 		Description(description).
 		Footer("ID: " + user.ID)
 
 	if user.Avatar != "" {
-		e.Author(user.Username, user.AvatarURL("512")).Thumbnail(user.AvatarURL("512"))
+		e.Author("Information about "+user.Username, user.AvatarURL("512")).Thumbnail(user.AvatarURL("512"))
 	}
 
 	if len(member.Roles) > 0 {
@@ -78,7 +78,7 @@ func (cmd UserCommand) Status(userStatus discordgo.Status) string {
 		status = types.EmojiOffline + "Offline"
 	}
 
-	return fmt.Sprintf("**Status:** %s", status)
+	return fmt.Sprintf("**Status:** %s\n", status)
 }
 
 func (cmd UserCommand) Activities(userActivities []*discordgo.Activity) string {
@@ -103,11 +103,11 @@ func (cmd UserCommand) Activities(userActivities []*discordgo.Activity) string {
 		builder.WriteString("\n")
 	}
 
-	return strings.TrimSuffix(builder.String(), "\n")
+	return builder.String()
 }
 
 func (cmd UserCommand) JoinedAt(member *discordgo.Member) string {
-	return fmt.Sprintf("**Joined At:** <t:%[1]d:D> (<t:%[1]d:R>)", member.JoinedAt.Unix())
+	return fmt.Sprintf("**Joined at:** <t:%[1]d:D> (<t:%[1]d:R>)\n", member.JoinedAt.Unix())
 }
 
 func (cmd UserCommand) CreatedAt(user *discordgo.User) string {
@@ -116,7 +116,7 @@ func (cmd UserCommand) CreatedAt(user *discordgo.User) string {
 		return "invalid id"
 	}
 
-	return fmt.Sprintf("**Created At:** <t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix())
+	return fmt.Sprintf("**Created at:** <t:%[1]d:D> (<t:%[1]d:R>)", createdAt.Unix())
 }
 
 func (cmd UserCommand) Roles(roles []string) string {
