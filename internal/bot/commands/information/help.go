@@ -13,7 +13,7 @@ type HelpCommand struct{}
 func NewHelpCommand() command.Command {
 	return command.New().
 		Name("help").
-		Description("List of all commands").
+		Description("List of all commands and category").
 		OptionString("query", "Command or category", false).
 		Category(types.CategoryInformation).
 		Handler(HelpCommand{}).
@@ -48,11 +48,29 @@ func (c HelpCommand) Handle(ctx *command.Context) error {
 		}
 
 		for _, cmd := range commands {
-			if !cmd.Hidden && strings.Contains(strings.ToLower(cmd.ApplicationCommand.Name), strings.ToLower(query)) {
-				e.Field(cmd.ApplicationCommand.Name, cmd.ApplicationCommand.Description, false)
-				e.Title(fmt.Sprintf("Information of command %s", cmd.ApplicationCommand.Name))
-				return ctx.ReplyEmbed(e.Build())
+			if cmd.Hidden || !strings.Contains(strings.ToLower(cmd.ApplicationCommand.Name), strings.ToLower(query)) {
+				continue
 			}
+
+			args := make([]string, 0)
+			for _, option := range cmd.ApplicationCommand.Options {
+				if option.Required {
+					args = append(args, fmt.Sprintf("<%s>", option.Name))
+				} else {
+					args = append(args, fmt.Sprintf("[%s]", option.Name))
+				}
+			}
+
+			description := fmt.Sprintf(
+				"`/%s %s`\n%s",
+				cmd.ApplicationCommand.Name,
+				strings.Join(args, " "),
+				cmd.ApplicationCommand.Description,
+			)
+
+			e.Title(fmt.Sprintf("Information of command %s", cmd.ApplicationCommand.Name))
+			e.Description(description)
+			return ctx.ReplyEmbed(e.Build())
 		}
 
 		return ctx.ReplyError(fmt.Sprintf("Command or category **%s** not found.", query))

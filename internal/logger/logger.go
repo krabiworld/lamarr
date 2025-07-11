@@ -18,12 +18,13 @@ func Init() {
 	// Enable unix time format
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	// Enable caller
+	// Change caller format
 	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		return filepath.Base(file) + ":" + strconv.Itoa(line)
 	}
 
-	log.Logger = log.With().Caller().Logger()
+	// Enable caller and pretty logs
+	log.Logger = log.With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	// Set log level
 	logLevel := cfg.Get().LogLevel

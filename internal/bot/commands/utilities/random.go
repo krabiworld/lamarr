@@ -11,7 +11,7 @@ type RandomCommand struct{}
 
 func NewRandomCommand() command.Command {
 	return command.New().
-		Name("rand").
+		Name("random").
 		Description("Get a random number").
 		OptionInt("min", "Minimum number", false).
 		OptionInt("max", "Maximum number", false).
