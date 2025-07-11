@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/krabiworld/lamarr/internal/api"
 	"github.com/krabiworld/lamarr/internal/bot"
-	"github.com/krabiworld/lamarr/internal/cfg"
+	"github.com/krabiworld/lamarr/internal/config"
 	"github.com/krabiworld/lamarr/internal/db"
 	"github.com/krabiworld/lamarr/internal/logger"
 	repositoryImpl "github.com/krabiworld/lamarr/internal/repositories/impl"
@@ -16,9 +16,9 @@ import (
 
 func main() {
 	uptime.Init()
-	cfg.Init()
+	config.Init()
 	logger.Init()
-	conn := db.InitAndGet()
+	conn := db.MustNew()
 
 	guildRepository := repositoryImpl.NewGuildRepository(conn)
 	guildService := serviceImpl.NewGuildServiceImpl(guildRepository)

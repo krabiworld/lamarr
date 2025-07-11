@@ -21,9 +21,6 @@ func NewStatsCommand() command.Command {
 
 func (cmd StatsCommand) Handle(ctx *command.Context) error {
 	guilds := ctx.State().Guilds
-	//members := ctx.Caches().MembersAllLen()
-	//channels := ctx.Caches().ChannelsLen()
-	selfUser := ctx.SelfUser()
 
 	channels := 0
 	members := 0
@@ -34,6 +31,8 @@ func (cmd StatsCommand) Handle(ctx *command.Context) error {
 
 	main := fmt.Sprintf("**Servers:** %d\n**Users:** %d\n**Channels:** %d", len(guilds), members, channels)
 	platform := fmt.Sprintf("**Ping:** %s\n**Uptime:** <t:%d:R>", ctx.Ping(), uptime.Get())
+
+	selfUser := ctx.SelfUser()
 
 	e := embed.New().
 		Title("Bot statistics").

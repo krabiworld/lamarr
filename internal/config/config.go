@@ -1,4 +1,4 @@
-package cfg
+package config
 
 import (
 	"github.com/caarlos0/env/v11"
@@ -21,11 +21,8 @@ type Config struct {
 	DiscordToken   string `env:"DISCORD_TOKEN"`
 
 	// Database
-	DBDatabase string `env:"DB_DATABASE"`
-	DBUsername string `env:"DB_USERNAME"`
-	DBPassword string `env:"DB_PASSWORD"`
-	DBHostname string `env:"DB_HOSTNAME"`
-	DBPort     string `env:"DB_PORT"`
+	DatabaseType string `env:"DATABASE_TYPE"`
+	DatabaseDSN  string `env:"DATABASE_DSN"`
 }
 
 var cfg *Config

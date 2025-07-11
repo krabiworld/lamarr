@@ -3,12 +3,12 @@ package api
 import (
 	"encoding/json"
 	"github.com/gofiber/fiber/v3"
-	"github.com/krabiworld/lamarr/internal/cfg"
+	"github.com/krabiworld/lamarr/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
 func Start() {
-	appName := cfg.Get().AppName
+	appName := config.Get().AppName
 
 	app := fiber.New(fiber.Config{
 		ServerHeader: appName,
@@ -34,7 +34,7 @@ func Start() {
 	})
 
 	go func() {
-		log.Fatal().Err(app.Listen(cfg.Get().ApiAddr, listenConfig)).Send()
+		log.Fatal().Err(app.Listen(config.Get().ApiAddr, listenConfig)).Send()
 	}()
 
 	log.Info().Msg("API started")

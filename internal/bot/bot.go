@@ -6,20 +6,20 @@ import (
 	"github.com/krabiworld/lamarr/internal/bot/commands/utilities"
 	"github.com/krabiworld/lamarr/internal/bot/handlers"
 	"github.com/krabiworld/lamarr/internal/bot/handlers/command"
-	"github.com/krabiworld/lamarr/internal/cfg"
+	"github.com/krabiworld/lamarr/internal/config"
 	"github.com/krabiworld/lamarr/internal/services"
 	"github.com/krabiworld/lamarr/internal/types"
 	"github.com/rs/zerolog/log"
 )
 
 func Start(guildService services.GuildService) {
-	ownerId := cfg.Get().DiscordOwnerID
-	guildId := cfg.Get().DiscordGuildID
+	ownerId := config.Get().DiscordOwnerID
+	guildId := config.Get().DiscordGuildID
 
 	commandHandler := command.NewHandler(InitCommands(), InitCategories(), guildService, ownerId)
 	guildEvents := handlers.NewGuildEvents(guildService)
 
-	session, err := discordgo.New("Bot " + cfg.Get().DiscordToken)
+	session, err := discordgo.New("Bot " + config.Get().DiscordToken)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return

@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/krabiworld/lamarr/internal/cfg"
+	"github.com/krabiworld/lamarr/internal/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -11,7 +11,7 @@ import (
 
 func Init() {
 	// Enable pretty logging if debug mode is enabled
-	if cfg.Get().Debug {
+	if config.Get().Debug {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 
@@ -27,7 +27,7 @@ func Init() {
 	log.Logger = log.With().Caller().Logger().Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	// Set log level
-	logLevel := cfg.Get().LogLevel
+	logLevel := config.Get().LogLevel
 
 	if logLevel == "" {
 		log.Fatal().Msg("Set LOG_LEVEL variable")

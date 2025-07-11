@@ -1,31 +1,24 @@
 package db
 
 import (
-	"fmt"
-	"github.com/krabiworld/lamarr/internal/cfg"
+	"errors"
+	"github.com/krabiworld/lamarr/internal/config"
 	"github.com/krabiworld/lamarr/internal/db/models"
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
-func InitAndGet() *gorm.DB {
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		cfg.Get().DBHostname,
-		cfg.Get().DBUsername,
-		cfg.Get().DBPassword,
-		cfg.Get().DBDatabase,
-		cfg.Get().DBPort,
-	)
-
-	config := &gorm.Config{
-		Logger: Logger{},
+func MustNew() *gorm.DB {
+	dial, err := openDialector()
+	if err != nil {
+		log.Panic().Err(err).Msg("Failed to open dialector")
 	}
 
-	db, err := gorm.Open(postgres.Open(dsn), config)
+	db, err := gorm.Open(dial, &gorm.Config{})
 	if err != nil {
-		log.Error().Err(err).Send()
+		log.Panic().Err(err).Send()
 		return nil
 	}
 
@@ -35,9 +28,20 @@ func InitAndGet() *gorm.DB {
 		&models.Stats{},
 	)
 	if err != nil {
-		log.Error().Err(err).Send()
+		log.Panic().Err(err).Send()
 		return nil
 	}
 
 	return db
+}
+
+func openDialector() (gorm.Dialector, error) {
+	switch config.Get().DatabaseType {
+	case "postgres":
+		return postgres.Open(config.Get().DatabaseDSN), nil
+	case "sqlite":
+		return sqlite.Open(config.Get().DatabaseDSN), nil
+	default:
+		return nil, errors.New("unsupported dialector type")
+	}
 }
